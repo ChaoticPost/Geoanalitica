@@ -1,9 +1,22 @@
+import { HeroSection } from '@/components/sections/HeroSection'
+import { PromoSection } from '@/components/sections/PromoSection'
+import { LocationAnalytics } from '@/components/sections/LocationAnalytics'
+import { PricingSection } from '@/components/sections/PricingSection'
+import { AboutSection } from '@/components/sections/AboutSection'
+import { DemoSection } from '@/components/sections/DemoSection'
+import { ContactSection } from '@/components/sections/ContactSection'
+
 const HomePage = () => {
     return (
-        <div>
-            <h1 className="text-3xl font-bold">Welcome to Geoanalitica</h1>
-            <p className="mt-4">Your geospatial analytics platform</p>
-        </div>
+        <main>
+            <HeroSection />
+            <PromoSection />
+            <LocationAnalytics />
+            <PricingSection />
+            <AboutSection />
+            <DemoSection />
+            <ContactSection />
+        </main>
     )
 }
 

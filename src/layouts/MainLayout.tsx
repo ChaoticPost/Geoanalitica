@@ -1,25 +1,25 @@
+import { type ReactElement } from 'react'
 import { Outlet } from 'react-router-dom'
 
-const MainLayout = () => {
-    return (
-        <div className="min-h-screen bg-white">
-            <header className="bg-gray-800 text-white p-4">
-                <nav>
-                    {/* Add navigation here */}
-                </nav>
-            </header>
-
-            <main className="container mx-auto px-4 py-8">
-                <Outlet />
-            </main>
-
-            <footer className="bg-gray-800 text-white p-4 mt-auto">
-                <div className="container mx-auto">
-                    {/* Add footer content here */}
-                </div>
-            </footer>
+const MainLayout = (): ReactElement => {
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="bg-card shadow-sm">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="font-bold text-xl text-foreground">GeoAnalytica</div>
+          {/* Здесь будет навигация */}
+        </nav>
+      </header>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Outlet />
+      </main>
+      <footer className="bg-muted mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Здесь будет футер */}
         </div>
-    )
+      </footer>
+    </div>
+  )
 }
 
 export default MainLayout 

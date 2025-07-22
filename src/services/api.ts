@@ -1,25 +1,33 @@
-import { ApiResponse } from '@/types'
+const API_URL = 'http://localhost:8000/api/v1';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
-export const api = {
-  async get<T>(endpoint: string): Promise<ApiResponse<T>> {
-    const response = await fetch(`${BASE_URL}${endpoint}`)
-    const data = await response.json()
-    return data
-  },
-
-  async post<T>(endpoint: string, body: unknown): Promise<ApiResponse<T>> {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    })
-    const data = await response.json()
-    return data
-  },
+export interface ContactFormData {
+  name: string;
+  email: string;
+  message: string;
 }
 
-export default api 
+export interface ContactResponse {
+  status: string;
+  message: string;
+}
+
+export const api = {
+  contact: {
+    send: async (data: ContactFormData): Promise<ContactResponse> => {
+      const response = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to send message');
+      }
+
+      return response.json();
+    },
+  },
+}; 
