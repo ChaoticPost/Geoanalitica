@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { ApiResponse } from '@/types'
-import api from '@/services/api'
+import { api } from '@/services/api';
 
 export function useApi<T>() {
   const [data, setData] = useState<T | null>(null)
@@ -11,7 +11,7 @@ export function useApi<T>() {
     try {
       setLoading(true)
       setError(null)
-      const response: ApiResponse<T> = await api.get(endpoint)
+      const response = await api.get<ApiResponse<T>>(endpoint)
       setData(response.data)
     } catch (err) {
       setError(err instanceof Error ? err : new Error('An error occurred'))
