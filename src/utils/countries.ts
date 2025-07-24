@@ -1,19 +1,20 @@
 export interface Country {
     code: string;
-    flag: string;
-    phoneCode: string;
     name: string;
+    phoneCode: string;
 }
 
 export const countries: Country[] = [
-    { code: 'ru', flag: 'fi fi-ru', phoneCode: '+7', name: 'Россия' },
-    { code: 'kz', flag: 'fi fi-kz', phoneCode: '+7', name: 'Казахстан' },
-    { code: 'by', flag: 'fi fi-by', phoneCode: '+375', name: 'Беларусь' },
-    { code: 'ua', flag: 'fi fi-ua', phoneCode: '+380', name: 'Украина' },
-    { code: 'us', flag: 'fi fi-us', phoneCode: '+1', name: 'США' },
-    { code: 'gb', flag: 'fi fi-gb', phoneCode: '+44', name: 'Великобритания' },
-    { code: 'de', flag: 'fi fi-de', phoneCode: '+49', name: 'Германия' },
-    { code: 'fr', flag: 'fi fi-fr', phoneCode: '+33', name: 'Франция' },
-    { code: 'cn', flag: 'fi fi-cn', phoneCode: '+86', name: 'Китай' },
-    { code: 'jp', flag: 'fi fi-jp', phoneCode: '+81', name: 'Япония' },
+    { code: 'RU', name: 'Россия', phoneCode: '+7' },
+    { code: 'KZ', name: 'Казахстан', phoneCode: '+7' },
+    { code: 'BY', name: 'Беларусь', phoneCode: '+375' },
+    { code: 'UA', name: 'Украина', phoneCode: '+380' },
+    { code: 'UZ', name: 'Узбекистан', phoneCode: '+998' },
+    { code: 'KG', name: 'Киргизия', phoneCode: '+996' },
+    { code: 'TJ', name: 'Таджикистан', phoneCode: '+992' },
+    { code: 'TM', name: 'Туркменистан', phoneCode: '+993' },
+    { code: 'AZ', name: 'Азербайджан', phoneCode: '+994' },
+    { code: 'AM', name: 'Армения', phoneCode: '+374' },
+    { code: 'GE', name: 'Грузия', phoneCode: '+995' },
+    { code: 'MD', name: 'Молдова', phoneCode: '+373' },
 ]; 

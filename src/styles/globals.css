@@ -4,15 +4,11 @@
 
 html {
   scroll-behavior: smooth;
-}
-
-body {
-  @apply bg-white dark:bg-[#121212] text-gray-900 dark:text-gray-100;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -35,7 +31,6 @@ body {
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
@@ -63,17 +58,7 @@ body {
   }
 
   body {
-    @apply bg-background text-foreground;
-  }
-}
-
-@layer base {
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-
-  body {
-    @apply bg-gray-50 text-gray-900;
+    @apply text-foreground;
   }
 
   h1 {

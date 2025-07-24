@@ -1,62 +1,69 @@
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/Button'
-import { MapPin } from 'lucide-react'
+import { Button } from '@/components/ui/Button';
+import { motion } from 'framer-motion';
 
 export const HeroSection = () => {
     return (
-        <section className="relative overflow-hidden bg-white dark:bg-gray-900">
-            <div className="max-w-7xl mx-auto">
-                <div className="relative z-10 pb-8 bg-white dark:bg-gray-900 sm:pb-16 md:pb-20 lg:w-full lg:pb-28 xl:pb-32">
-                    <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+        <section className="relative isolate pt-10 bg-white dark:bg-[#0f0f0f]">
+            {/* Subtle gradient accents */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.15 }}
+                transition={{ duration: 2 }}
+                className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden sm:-top-80 pointer-events-none"
+                aria-hidden="true"
+            >
+                <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-red-500/20 to-transparent dark:from-red-500/10 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
+            </motion.div>
+
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <div className="mx-auto max-w-2xl py-20 sm:py-28 lg:py-32">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                        className="text-center relative z-10"
+                    >
+                        <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl bg-transparent">
+                            Геоаналитика для вашего бизнеса
+                        </h1>
+                        <p className="mt-6 text-lg leading-8 text-gray-700 dark:text-gray-300">
+                            Используйте данные о проходимости и конкурентах, чтобы выбрать лучшее место для вашего магазина.
+                            Анализируйте потенциал локации и принимайте решения на основе точных данных.
+                        </p>
                         <motion.div
-                            className="sm:text-center lg:text-left"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                            className="mt-10 flex items-center justify-center gap-x-6"
                         >
-                            <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
-                                <span className="block">Геоаналитика для</span>{' '}
-                                <span className="block text-red-600">вашего бизнеса</span>
-                            </h1>
-                            <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                                Принимайте решения на основе данных. Анализируйте локации, конкурентов и целевую аудиторию с помощью передовых технологий геоаналитики.
-                            </p>
-                            <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                                <motion.div
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <Button size="lg" className="w-full sm:w-auto">
-                                        Начать бесплатно
-                                    </Button>
-                                </motion.div>
-                                <motion.div
-                                    className="mt-3 sm:mt-0 sm:ml-3"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                                        <MapPin className="mr-2 h-4 w-4" />
-                                        Демо анализ
-                                    </Button>
-                                </motion.div>
-                            </div>
+                            <Button
+                                className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                            >
+                                Попробовать бесплатно
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="text-base font-semibold text-gray-900 dark:text-gray-200 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-200"
+                                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                            >
+                                Узнать больше
+                            </Button>
                         </motion.div>
-                    </main>
+                    </motion.div>
                 </div>
             </div>
+
+            {/* Bottom subtle accent */}
             <motion.div
-                className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.15 }}
+                transition={{ duration: 2, delay: 0.5 }}
+                className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden sm:top-[calc(100%-30rem)] pointer-events-none"
+                aria-hidden="true"
             >
-                <img
-                    className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full"
-                    src="/hero-image.jpg"
-                    alt="Геоаналитика в действии"
-                />
+                <div className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-red-500/20 to-transparent dark:from-red-500/10 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]" />
             </motion.div>
         </section>
-    )
-} 
+    );
+}; 

@@ -11,6 +11,13 @@ export default defineConfig({
     host: true, // Разрешаем доступ извне и биндим на все интерфейсы
     watch: {
       usePolling: true // Для лучшей работы с Windows
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false
+      }
     }
   },
   resolve: {
