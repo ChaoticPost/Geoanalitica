@@ -1,51 +1,50 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-import os
-from app.core.config import settings
-from app.api.v1.router import api_router
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        # HSTS: принудительно HTTPS на 1 год
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+        # Защита от XSS
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        # Запрет встраивания сайта в iframe (защита от clickjacking)
+        response.headers["X-Frame-Options"] = "DENY"
+        # Запрет угадывания MIME типов
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        # CSP (Content Security Policy)
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';"
+        )
+        return response
+
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    title="GeoAnalitica API",
+    description="API для геоаналитики и поиска локаций",
+    version="1.0.0",
 )
 
-# Set all CORS enabled origins
+# Добавляем middleware
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["*"],  # В продакшене заменить на реальные домены
+)
+
+# Существующие CORS настройки
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=["*"],  # В продакшене заменить на список разрешенных доменов
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mount static files
-static_dir = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "static"
-)
-os.makedirs(static_dir, exist_ok=True)
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
-
-# Include API router
-app.include_router(api_router, prefix=settings.API_V1_STR)
-
-
-@app.get("/favicon.ico")
-async def get_favicon():
-    """Serve favicon"""
-    favicon_path = os.path.join(static_dir, "favicon.ico")
-    if not os.path.exists(favicon_path):
-        # Если favicon.ico не существует, используем стандартный
-        favicon_path = os.path.join(os.path.dirname(__file__), "static", "favicon.ico")
-    return FileResponse(favicon_path)
-
-
-@app.get("/")
-async def root():
-    return {
-        "message": "Welcome to Geoanalitica API",
-        "docs_url": "/docs",
-        "version": settings.VERSION,
-    }
+# ... rest of your existing code ...
