@@ -14,8 +14,8 @@ const LocationAnalytics = lazy(() =>
 const PricingSection = lazy(() =>
     import('@/components/sections/PricingSection').then(module => ({ default: module.PricingSection }))
 );
-const AboutSection = lazy(() =>
-    import('@/components/sections/AboutSection').then(module => ({ default: module.AboutSection }))
+const ReviewsSection = lazy(() =>
+    import('@/components/sections/ReviewsSection').then(module => ({ default: module.ReviewsSection }))
 );
 const DemoSection = lazy(() =>
     import('@/components/sections/DemoSection').then(module => ({ default: module.DemoSection }))
@@ -40,27 +40,27 @@ const HomePage = () => {
         <div className="relative">
             <ErrorBoundary>
                 <Suspense fallback={<LoadingFallback name="HeroSection" />}>
-                    <HeroSection />
+            <HeroSection />
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="PromoSection" />}>
-                    <PromoSection />
+            <PromoSection />
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="LocationAnalytics" />}>
-                    <LocationAnalytics />
+            <LocationAnalytics />
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="PricingSection" />}>
-                    <PricingSection />
+            <PricingSection />
                 </Suspense>
 
-                <Suspense fallback={<LoadingFallback name="AboutSection" />}>
-                    <AboutSection />
+                <Suspense fallback={<LoadingFallback name="ReviewsSection" />}>
+                    <ReviewsSection />
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="DemoSection" />}>
-                    <DemoSection />
+            <DemoSection />
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="FAQSection" />}>
@@ -68,7 +68,7 @@ const HomePage = () => {
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="ContactSection" />}>
-                    <ContactSection />
+            <ContactSection />
                 </Suspense>
             </ErrorBoundary>
         </div>

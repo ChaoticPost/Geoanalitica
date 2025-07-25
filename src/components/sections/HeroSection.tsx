@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 export const HeroSection = () => {
     return (
-        <section className="relative isolate pt-10 bg-white dark:bg-[#0f0f0f]">
+        <section className="relative isolate min-h-[calc(100vh-4rem)] flex items-center justify-center bg-white dark:bg-[#0f0f0f]">
             {/* Subtle gradient accents */}
             <motion.div
                 initial={{ opacity: 0 }}
@@ -15,8 +15,8 @@ export const HeroSection = () => {
                 <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-red-500/20 to-transparent dark:from-red-500/10 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
             </motion.div>
 
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="mx-auto max-w-2xl py-20 sm:py-28 lg:py-32">
+            <div className="w-full">
+                <div className="mx-auto max-w-2xl px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -53,17 +53,6 @@ export const HeroSection = () => {
                     </motion.div>
                 </div>
             </div>
-
-            {/* Bottom subtle accent */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.15 }}
-                transition={{ duration: 2, delay: 0.5 }}
-                className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden sm:top-[calc(100%-30rem)] pointer-events-none"
-                aria-hidden="true"
-            >
-                <div className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-red-500/20 to-transparent dark:from-red-500/10 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]" />
-            </motion.div>
         </section>
     );
 }; 

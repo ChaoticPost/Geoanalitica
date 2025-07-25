@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Swiper custom styles */
+.swiper {
+  padding-bottom: 3rem !important;
+}
+
+.swiper-pagination {
+  bottom: 0 !important;
+}
+
+.swiper-button-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Rest of your global styles */
 html {
   scroll-behavior: smooth;
   font-family: 'Inter', system-ui, sans-serif;

@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { load } from '@2gis/mapgl';
+import type { Map, MapOptions } from '../types/mapgl';
 import { motion } from 'framer-motion';
-import { MapPin, Users, TrendingUp, BarChart, Lightbulb } from 'lucide-react';
+import { MapPin, Users, TrendingUp, BarChart, Lightbulb, Plus, Minus } from 'lucide-react';
+import { RecommendationsGrid } from './RecommendationsGrid';
 
-// 2GIS API Key from environment variables
-const MAP_API_KEY = import.meta.env.VITE_2GIS_API_KEY;
-
-if (!MAP_API_KEY) {
-  console.error('2GIS API key is not set in environment variables');
-}
+// 2GIS API Key
+const MAP_API_KEY = '2cb31629-9703-41ac-8398-e2da9fa78838';
 
 type BusinessType = 'retail' | 'restaurants' | 'services';
 
@@ -48,9 +46,18 @@ const metrics: Metric[] = [
 
 export const DemoSection = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<any>(null);
+  const mapInstance = useRef<Map | null>(null);
   const [selectedType, setSelectedType] = useState<BusinessType>('restaurants');
   const [mapError, setMapError] = useState<string | null>(null);
+
+  // Функция для изменения зума
+  const handleZoom = (direction: 'in' | 'out') => {
+    if (!mapInstance.current) return;
+
+    const currentZoom = mapInstance.current.getZoom();
+    const newZoom = direction === 'in' ? currentZoom + 1 : currentZoom - 1;
+    mapInstance.current.setZoom(newZoom);
+  };
 
   useEffect(() => {
     let cleanup: (() => void) | undefined;
@@ -63,13 +70,18 @@ export const DemoSection = () => {
         if (mapInstance.current || !mapContainer.current) return;
 
         console.log('Creating map instance...');
-        // Создаем карту
-        mapInstance.current = new mapglAPI.Map(mapContainer.current, {
+
+        const mapOptions: MapOptions = {
           center: [37.618423, 55.751244], // Москва
           zoom: 13,
           key: MAP_API_KEY,
+          styleZoom: 13,
           style: 'c080bb6a-8134-4993-93a1-5b4d8c36a59b', // Темная тема для карты
-        });
+          zoomControl: false, // Отключаем стандартные контролы
+        };
+
+        // Создаем карту
+        mapInstance.current = new mapglAPI.Map(mapContainer.current, mapOptions);
 
         console.log('Map initialized successfully');
 
@@ -97,57 +109,51 @@ export const DemoSection = () => {
   ];
 
   return (
-    <section id="demo" className="py-16 bg-white dark:bg-[#121212] relative">
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        className="max-w-6xl mx-auto px-4"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Интерактивная демонстрация
-          </h2>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-            Посмотрите, как работает наша платформа на реальных данных. Выберите тип бизнеса и исследуйте аналитику для разных локаций.
-          </p>
-        </motion.div>
-
+    <section id="demo" className="min-h-[calc(100vh-4rem)] flex items-center bg-white dark:bg-[#0f0f0f]">
+      <div className="max-w-6xl mx-auto px-4 w-full py-8">
+        <h2 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-4">
+          Интерактивная демонстрация
+        </h2>
+        <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
+          Посмотрите, как работает наша платформа на реальных данных
+        </p>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Правая колонка с картой */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="order-2 lg:order-1"
-          >
-            <div className="w-full" style={{ height: '500px' }}>
-              <div className="relative w-full h-full rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-lg">
+          <div className="order-2 lg:order-1">
+            <div className="relative w-full h-[500px] rounded-xl overflow-hidden">
+              <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
                 {mapError ? (
-                  <div className="absolute inset-0 flex items-center justify-center p-4 text-red-500 bg-gray-100 dark:bg-gray-800">
+                  <div className="absolute inset-0 flex items-center justify-center p-4 text-red-500">
                     {mapError}
                   </div>
                 ) : (
-                  <div
-                    ref={mapContainer}
-                    className="absolute inset-0"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                    }}
-                  />
+                  <>
+                    <div
+                      ref={mapContainer}
+                      className="absolute inset-0 z-10"
+                    />
+                    {/* Кастомные кнопки зума в правом верхнем углу */}
+                    <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+                      <button
+                        onClick={() => handleZoom('in')}
+                        className="w-8 h-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        aria-label="Приблизить"
+                      >
+                        <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                      </button>
+                      <button
+                        onClick={() => handleZoom('out')}
+                        className="w-8 h-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        aria-label="Отдалить"
+                      >
+                        <Minus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Левая колонка с контролами */}
           <motion.div
@@ -171,7 +177,7 @@ export const DemoSection = () => {
                   {type.label}
                 </button>
               ))}
-              </div>
+            </div>
 
             {/* Метрики */}
             <div className="grid grid-cols-2 gap-3">
@@ -218,21 +224,29 @@ export const DemoSection = () => {
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 Благодаря геоаналитике вы сможете получить информацию о лучших локациях для вашего бизнеса. Используйте анализ трафика, конкуренции и стоимости аренды, чтобы принимать обоснованные решения.
               </p>
-        </div>
-      </div>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Заголовок для карточек */}
-        <motion.h2
+        {/* Заголовок для рекомендаций */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.7 }}
-          className="text-2xl font-bold text-gray-900 dark:text-white mt-16 mb-8 text-center"
+          className="mt-16 text-center"
         >
-          Топ рекомендации для вашего бизнеса
-        </motion.h2>
-      </motion.div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Топ рекомендации для вашего бизнеса
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
+            На основе анализа локаций подберем оптимальные варианты помещений с учетом проходимости, конкуренции и стоимости аренды
+          </p>
+        </motion.div>
+
+        {/* Сетка рекомендаций */}
+        <RecommendationsGrid />
+      </div>
     </section>
   );
 }; 

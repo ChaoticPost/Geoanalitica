@@ -67,20 +67,18 @@ const FeatureCard = ({ feature, index }: { feature: Feature; index: number }) =>
     return (
         <motion.div
             variants={itemVariants}
-            className="relative flex flex-col p-8 bg-gray-50 dark:bg-gray-900 rounded-3xl group hover:shadow-xl transition-shadow"
+            className="relative flex flex-col p-8 bg-white/50 dark:bg-black/50 rounded-3xl group hover:bg-white dark:hover:bg-gray-900 transition-all duration-300"
         >
             <div className="relative">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 group-hover:bg-red-500 transition-colors">
-                    <Icon className="h-8 w-8 text-gray-500 dark:text-gray-400 group-hover:text-white transition-colors" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-gray-800 group-hover:bg-red-500 transition-colors">
+                    <Icon className="h-8 w-8 text-gray-600 dark:text-gray-400 group-hover:text-white transition-colors" />
                 </div>
-                {/* Декоративный элемент */}
-                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-red-500/20 to-transparent opacity-0 group-hover:opacity-100 blur transition-opacity" />
             </div>
 
             <h3 className="mt-6 text-2xl font-semibold text-gray-900 dark:text-white group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors">
                 {feature.title}
             </h3>
-            <p className="mt-4 text-lg leading-relaxed text-gray-500 dark:text-gray-400">
+            <p className="mt-4 text-lg leading-relaxed text-gray-600 dark:text-gray-400">
                 {feature.description}
             </p>
         </motion.div>
@@ -89,10 +87,7 @@ const FeatureCard = ({ feature, index }: { feature: Feature; index: number }) =>
 
 export const LocationAnalytics = () => {
     return (
-        <section id="features" className="py-24 bg-white dark:bg-black relative overflow-hidden">
-            {/* Декоративный фоновый элемент */}
-            <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 to-transparent dark:from-gray-900/50 pointer-events-none" />
-
+        <section id="features" className="py-24 relative overflow-hidden">
             <motion.div
                 initial="hidden"
                 whileInView="visible"

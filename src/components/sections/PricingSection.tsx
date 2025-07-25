@@ -1,114 +1,163 @@
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/Button'
-import { Check } from 'lucide-react'
+import { Check, ArrowRight } from 'lucide-react'
 
 const plans = [
     {
-        name: 'Базовый',
+        name: 'Стартап',
         price: '4 900',
-        description: 'Идеально для малого бизнеса',
+        description: 'Для малого бизнеса',
         features: [
-            'До 5 локаций в месяц',
+            'До 3 локаций в месяц',
             'Базовая аналитика',
             'Экспорт в PDF',
-            'Email поддержка'
+            'Email поддержка',
+            'Обновления раз в неделю'
         ]
+    },
+    {
+        name: 'Бета-тест',
+        price: '0',
+        description: 'Попробуйте первым',
+        features: [
+            'Одна локация',
+            'Базовая аналитика',
+            'Экспорт в PDF',
+            'Приоритетный доступ к новым функциям',
+            'Помощь в развитии сервиса'
+        ],
+        popular: true,
+        beta: true
     },
     {
         name: 'Бизнес',
         price: '14 900',
         description: 'Для растущих компаний',
         features: [
-            'До 20 локаций в месяц',
+            'До 10 локаций в месяц',
             'Расширенная аналитика',
             'Экспорт в любом формате',
             'Приоритетная поддержка',
             'API доступ'
-        ],
-        popular: true
-    },
-    {
-        name: 'Корпоративный',
-        price: '49 900',
-        description: 'Максимальные возможности',
-        features: [
-            'Безлимитные локации',
-            'Премиум аналитика',
-            'Интеграция с CRM',
-            '24/7 поддержка',
-            'Персональный менеджер'
         ]
     }
 ]
 
 export const PricingSection = () => {
     return (
-        <section className="py-16 bg-gray-50 dark:bg-gray-800">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="pricing" className="py-24 relative overflow-hidden">
+            {/* Декоративный фоновый элемент */}
+            <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-white dark:from-gray-900 dark:to-gray-800" />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
                     transition={{ duration: 0.5 }}
-                    className="text-center mb-12"
+                    className="text-center mb-16"
                 >
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                        Тарифные планы
+                    <span className="inline-block text-red-500 font-medium mb-4 px-4 py-1 bg-red-50 dark:bg-red-500/10 rounded-full">
+                        Тарифы
+                    </span>
+                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                        Выберите свой план
                     </h2>
-                    <p className="text-xl text-gray-500 dark:text-gray-300">
-                        Выберите подходящий для вас план
+                    <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                        Начните бесплатно в рамках бета-тестирования или выберите план для бизнеса
                     </p>
                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
                     {plans.map((plan, index) => (
                         <motion.div
                             key={plan.name}
                             initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
                             transition={{ delay: index * 0.1, duration: 0.5 }}
                             className={`
-                relative bg-white dark:bg-gray-900 rounded-lg shadow-sm p-8
-                ${plan.popular ? 'ring-2 ring-red-500' : ''}
-              `}
+                                relative rounded-[32px] p-8 h-full backdrop-blur-sm
+                                ${plan.popular
+                                    ? 'bg-red-500 text-white shadow-[0_0_40px_rgba(239,68,68,0.2)]'
+                                    : 'bg-white/70 dark:bg-gray-900/70 hover:bg-white dark:hover:bg-gray-900 transition-colors duration-300'
+                                }
+                            `}
                         >
-                            {plan.popular && (
-                                <div className="absolute top-0 right-0 -mt-4 mr-4">
-                                    <span className="bg-red-500 text-white text-sm font-medium px-3 py-1 rounded-full">
-                                        Популярный
+                            {plan.beta && (
+                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                    <span className="bg-white text-red-500 text-sm font-medium px-4 py-1 rounded-full shadow-sm">
+                                        Бета-версия
                                     </span>
                                 </div>
                             )}
-                            <div className="text-center">
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                                    {plan.name}
-                                </h3>
-                                <p className="text-gray-500 dark:text-gray-300 mb-6">
-                                    {plan.description}
-                                </p>
-                                <div className="flex items-center justify-center mb-6">
-                                    <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                                        {plan.price}
-                                    </span>
-                                    <span className="text-gray-500 dark:text-gray-300 ml-2">₽/мес</span>
+                            <div className="space-y-6">
+                                <div>
+                                    <h3 className={`text-2xl font-bold mb-2 ${plan.popular ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                                        {plan.name}
+                                    </h3>
+                                    <p className={`${plan.popular ? 'text-white/90' : 'text-gray-500 dark:text-gray-300'}`}>
+                                        {plan.description}
+                                    </p>
                                 </div>
-                                <Button
-                                    variant={plan.popular ? 'default' : 'outline'}
-                                    className="w-full mb-6"
-                                >
-                                    Выбрать план
-                                </Button>
-                                <ul className="space-y-4 text-left">
+
+                                <div className={`pt-4 border-t ${plan.popular ? 'border-white/20' : 'border-gray-100 dark:border-gray-800'}`}>
+                                    <div className="flex items-baseline">
+                                        <span className={`text-5xl font-bold tracking-tight ${plan.popular ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                                            {plan.price}
+                                        </span>
+                                        <span className={`ml-2 text-2xl ${plan.popular ? 'text-white/90' : 'text-gray-500 dark:text-gray-300'}`}>
+                                            {plan.price === '0' ? '' : '₽'}
+                                        </span>
+                                        <span className={`ml-2 ${plan.popular ? 'text-white/70' : 'text-gray-400 dark:text-gray-500'}`}>
+                                            {plan.price === '0' ? '' : '/мес'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <ul className="space-y-4 min-h-[280px]">
                                     {plan.features.map((feature) => (
                                         <li key={feature} className="flex items-start">
-                                            <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
-                                            <span className="text-gray-500 dark:text-gray-300">{feature}</span>
+                                            <Check className={`h-5 w-5 mr-3 mt-0.5 ${plan.popular ? 'text-white' : 'text-red-500'}`}
+                                                strokeWidth={3} />
+                                            <span className={plan.popular ? 'text-white/90' : 'text-gray-600 dark:text-gray-300'}>
+                                                {feature}
+                                            </span>
                                         </li>
                                     ))}
                                 </ul>
+
+                                <Button
+                                    variant={plan.popular ? 'outline' : 'default'}
+                                    className={`
+                                        w-full group relative overflow-hidden
+                                        ${plan.popular
+                                            ? 'bg-white text-red-500 hover:bg-red-50 border-white hover:border-white'
+                                            : 'bg-red-500 text-white hover:bg-red-600 border-red-500'
+                                        }
+                                        h-12 rounded-2xl text-base font-medium
+                                    `}
+                                >
+                                    <span className="relative z-10 flex items-center justify-center">
+                                        {plan.beta ? 'Попробовать' : 'Выбрать план'}
+                                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                                    </span>
+                                </Button>
                             </div>
                         </motion.div>
                     ))}
                 </div>
+
+                {/* Нижняя подсказка */}
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                    className="text-center mt-12 text-gray-500 dark:text-gray-400"
+                >
+                    Все цены указаны с учётом НДС. Оплата в рублях РФ.
+                </motion.p>
             </div>
         </section>
     )

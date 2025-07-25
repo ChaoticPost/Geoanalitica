@@ -1,9 +1,9 @@
-import { AboutSection } from '@/components/sections/AboutSection'
+import { ReviewsSection } from '@/components/sections/ReviewsSection'
 
 const AboutPage = () => {
     return (
         <div className="min-h-screen">
-            <AboutSection />
+            <ReviewsSection />
         </div>
     )
 }

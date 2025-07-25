@@ -59,6 +59,12 @@ export const ContactSection = () => {
 
     const handlePhoneCodeChange = (code: string) => {
         setPhoneCode(code);
+        // Обновляем номер телефона с новым кодом страны
+        const phoneWithoutCode = getPhoneNumberWithoutCode(formData.phone);
+        setFormData(prev => ({
+            ...prev,
+            phone: phoneWithoutCode ? `${code}${phoneWithoutCode}` : ''
+        }));
     };
 
     const validateField = (name: string, value: string) => {
@@ -118,14 +124,33 @@ export const ContactSection = () => {
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
-        // Сохраняем только цифры из введенного номера
+        // Получаем только цифры из введенного номера
         const digitsOnly = value.replace(/\D/g, '');
         setFormData(prev => ({
             ...prev,
-            // При сохранении добавляем код страны к номеру
             phone: digitsOnly ? `${phoneCode}${digitsOnly}` : ''
         }));
         validateField('phone', `${phoneCode}${digitsOnly}`);
+    };
+
+    // Форматируем номер телефона для отображения
+    const formatPhoneNumber = (number: string) => {
+        const digits = number.replace(/\D/g, '');
+
+        let result = '';
+        if (digits.length > 0) {
+            result += '(' + digits.slice(0, 3);
+            if (digits.length > 3) {
+                result += ') ' + digits.slice(3, 6);
+                if (digits.length > 6) {
+                    result += '-' + digits.slice(6, 8);
+                    if (digits.length > 8) {
+                        result += '-' + digits.slice(8, 10);
+                    }
+                }
+            }
+        }
+        return result;
     };
 
     // Получаем только номер без кода страны для отображения в поле ввода
@@ -213,7 +238,7 @@ export const ContactSection = () => {
                         </h2>
                         <div className="flex justify-center w-full">
                             <img
-                                src="/src/assets/images/form_geo.png"
+                                src="/src/assets/images/photos/form_geo.png"
                                 alt="Геоаналитика форма"
                                 className="w-64 h-auto mt-8 hidden lg:block"
                             />
@@ -262,7 +287,7 @@ export const ContactSection = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="flex flex-col">
                                 <div className="relative flex items-center">
-                                    <div className="absolute left-3 z-10">
+                                    <div className="absolute left-3 z-10 flex items-center">
                                         <CountrySelect
                                             selectedCountry={selectedCountry}
                                             onSelect={setSelectedCountry}
@@ -271,14 +296,18 @@ export const ContactSection = () => {
                                     </div>
                                     <InputMask
                                         mask="(999) 999-99-99"
+                                        maskChar="_"
                                         type="tel"
                                         name="phone"
                                         value={getPhoneNumberWithoutCode(formData.phone)}
                                         onChange={handlePhoneChange}
-                                        className={`w-full pl-24 pr-4 py-3 rounded-xl bg-white/10 dark:bg-gray-900/50 border ${errors.phone ? 'border-red-500' : 'border-gray-200/20 dark:border-gray-700/30'
-                                            } text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-red-500/50 dark:focus:ring-red-400/50 focus:border-transparent transition-colors duration-200`}
+                                        className={`w-full pl-[5.5rem] pr-4 py-3 rounded-xl bg-white/5 dark:bg-[#1E1E1E] border ${errors.phone
+                                                ? 'border-red-500'
+                                                : 'border-gray-200/20 dark:border-gray-700/30'
+                                            } text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-red-500/50 dark:focus:ring-red-400/50 focus:border-red-500/30 transition-colors duration-200`}
                                         placeholder="(___) ___-__-__"
                                         required
+                                        alwaysShowMask
                                     />
                                 </div>
                                 {renderError('phone')}
