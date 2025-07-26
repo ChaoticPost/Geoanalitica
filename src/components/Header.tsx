@@ -1,13 +1,12 @@
 import { Button } from '@/components/ui/Button';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme } from '@/providers/ThemeProvider';
 import { Link } from 'react-router-dom';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import iconGeo from '@/assets/images/icons/icon_geo.png';
 
 export const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const { isDark, toggleTheme } = useTheme();
 
     const scrollToDemo = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
@@ -45,19 +44,7 @@ export const Header = () => {
 
                     {/* Theme Toggle and CTA Button */}
                     <div className="hidden md:flex items-center space-x-4">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={toggleTheme}
-                            className="rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800"
-                            aria-label="Toggle theme"
-                        >
-                            {isDark ? (
-                                <Sun className="h-5 w-5" />
-                            ) : (
-                                <Moon className="h-5 w-5" />
-                            )}
-                        </Button>
+                        <ThemeToggle />
                         <Link to="/auth/login">
                             <Button variant="ghost" className="text-gray-600 dark:text-gray-300 hover:text-red-500 hover:bg-gray-200 dark:hover:text-white dark:hover:bg-gray-800">
                                 Войти
@@ -72,19 +59,7 @@ export const Header = () => {
 
                     {/* Mobile menu button */}
                     <div className="md:hidden flex items-center space-x-2">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={toggleTheme}
-                            className="rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800"
-                            aria-label="Toggle theme"
-                        >
-                            {isDark ? (
-                                <Sun className="h-5 w-5" />
-                            ) : (
-                                <Moon className="h-5 w-5" />
-                            )}
-                        </Button>
+                        <ThemeToggle />
                         <Button
                             variant="ghost"
                             size="icon"
