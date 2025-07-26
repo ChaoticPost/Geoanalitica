@@ -67,7 +67,7 @@ export const ReviewsSection = () => {
     const navigationNextRef = useRef<HTMLButtonElement>(null);
 
     return (
-        <section id="reviews" className="py-12 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
+        <section id="reviews" className="py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-8">
                     <motion.div
@@ -76,10 +76,10 @@ export const ReviewsSection = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
                     >
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+                        <h2 className="text-3xl font-bold text-foreground mb-3">
                             Отзывы клиентов
                         </h2>
-                        <p className="text-lg text-gray-600 dark:text-gray-300">
+                        <p className="text-lg text-muted-foreground">
                             Истории успеха наших партнеров
                         </p>
                     </motion.div>
@@ -98,8 +98,8 @@ export const ReviewsSection = () => {
                         }}
                         pagination={{
                             clickable: true,
-                            bulletActiveClass: 'bg-red-500 !opacity-100',
-                            bulletClass: 'inline-block w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 mx-1.5 transition-all duration-300 cursor-pointer opacity-60',
+                            bulletActiveClass: 'bg-primary !opacity-100',
+                            bulletClass: 'inline-block w-2 h-2 rounded-full bg-muted dark:bg-muted/60 mx-1.5 transition-all duration-300 cursor-pointer opacity-60',
                         }}
                         navigation={{
                             prevEl: navigationPrevRef.current,
@@ -123,41 +123,41 @@ export const ReviewsSection = () => {
                         }}
                         className="!pb-8"
                     >
-                    {reviews.map((review, index) => (
+                        {reviews.map((review, index) => (
                             <SwiperSlide key={index} className="h-auto">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col mx-3"
-                        >
-                            {/* Quote icon */}
-                                    <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-sm mb-3">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                                    className="bg-card rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col mx-3"
+                                >
+                                    {/* Quote icon */}
+                                    <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-sm mb-3">
                                         <Quote className="w-3 h-3 text-white" />
-                            </div>
+                                    </div>
 
-                            {/* Rating */}
+                                    {/* Rating */}
                                     <div className="flex mb-4">
-                                {[...Array(review.rating)].map((_, i) => (
-                                    <Star
-                                        key={i}
+                                        {[...Array(review.rating)].map((_, i) => (
+                                            <Star
+                                                key={i}
                                                 className="w-4 h-4 text-yellow-400 fill-current"
-                                    />
-                                ))}
-                            </div>
+                                            />
+                                        ))}
+                                    </div>
 
-                            {/* Review text */}
+                                    {/* Review text */}
                                     <div className="flex-grow mb-4">
-                                        <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                                "{review.text}"
-                            </p>
+                                        <p className="text-card-foreground text-sm leading-relaxed">
+                                            "{review.text}"
+                                        </p>
                                     </div>
 
                                     {/* Author info with photo */}
-                                    <div className="flex items-center space-x-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                    <div className="flex items-center space-x-3 pt-3 border-t border-border">
                                         <div className="flex-shrink-0">
-                                            <div className="w-10 h-10 rounded-full overflow-hidden border border-red-500/20 bg-gray-50 dark:bg-gray-700 flex items-center justify-center">
+                                            <div className="w-10 h-10 rounded-full overflow-hidden border border-primary/20 bg-muted flex items-center justify-center">
                                                 {review.photo ? (
                                                     <img
                                                         src={review.photo}
@@ -171,48 +171,48 @@ export const ReviewsSection = () => {
                                                                 .map(n => n[0])
                                                                 .join('')
                                                                 .toUpperCase();
-                                                            target.parentElement!.className += ' text-red-500 text-sm font-medium';
+                                                            target.parentElement!.className += ' text-primary text-sm font-medium';
                                                         }}
                                                     />
                                                 ) : (
-                                                    <span className="text-red-500 text-xs font-medium">
+                                                    <span className="text-primary text-xs font-medium">
                                                         {review.author.split(' ').map(n => n[0]).join('').toUpperCase()}
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
                                         <div className="flex-grow min-w-0">
-                                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
-                                        {review.author}
-                                    </h4>
-                                            <p className="text-red-500 font-medium text-xs truncate">
-                                        {review.company}
-                                    </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                        {review.position}
-                                    </p>
-                                </div>
-                            </div>
-                        </motion.div>
+                                            <h4 className="font-semibold text-foreground text-sm truncate">
+                                                {review.author}
+                                            </h4>
+                                            <p className="text-primary font-medium text-xs truncate">
+                                                {review.company}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground truncate">
+                                                {review.position}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </motion.div>
                             </SwiperSlide>
-                    ))}
+                        ))}
                     </Swiper>
 
-                    {/* Navigation buttons - moved below and centered */}
+                    {/* Navigation buttons */}
                     <div className="flex justify-center items-center gap-8 mt-12">
                         <button
                             ref={navigationPrevRef}
-                            className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-shadow flex items-center justify-center"
+                            className="w-12 h-12 rounded-full bg-card shadow-sm hover:shadow-md transition-shadow flex items-center justify-center"
                             aria-label="Previous slide"
                         >
-                            <ChevronLeft className="w-5 h-5 text-gray-400" />
+                            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
                         </button>
                         <button
                             ref={navigationNextRef}
-                            className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-shadow flex items-center justify-center"
+                            className="w-12 h-12 rounded-full bg-card shadow-sm hover:shadow-md transition-shadow flex items-center justify-center"
                             aria-label="Next slide"
                         >
-                            <ChevronRight className="w-5 h-5 text-gray-400" />
+                            <ChevronRight className="w-5 h-5 text-muted-foreground" />
                         </button>
                     </div>
                 </div>
