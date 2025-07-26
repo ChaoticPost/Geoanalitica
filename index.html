@@ -7,10 +7,64 @@
     <link rel="apple-touch-icon" href="/src/assets/images/icons/icon_geo.png" sizes="180x180" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FF2E2E" />
+    <meta name="description" content="Геоаналитика для вашего бизнеса - анализ локаций и конкурентов" />
     <title>Геоаналитика</title>
+
+    <!-- Preload fonts -->
+    <link
+      rel="preload"
+      href="/src/assets/fonts/inter-var-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- Ngrok handler -->
+    <script>
+      // Обработка ngrok
+      if (location.hostname.endsWith("ngrok-free.app")) {
+        fetch("/", {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        })
+          .then((r) => r.text())
+          .then((html) => {
+            document.open();
+            document.write(html);
+            document.close();
+          });
+      }
+
+      // Обработка маршрутов React Router
+      (function() {
+        const path = window.location.pathname;
+        if (path !== '/' && !path.match(/\.[^/]*$/)) {
+          localStorage.setItem('initialPath', path);
+        }
+      })();
+    </script>
+
+    <!-- Error handler -->
+    <script>
+      window.addEventListener('error', function(e) {
+        console.error('Global error:', e);
+        if (!document.getElementById('root').children.length) {
+          document.getElementById('root').innerHTML = `
+            <div style="padding: 20px; text-align: center;">
+              <h1>Произошла ошибка при загрузке приложения</h1>
+              <p>Пожалуйста, обновите страницу или попробуйте позже.</p>
+              <pre style="text-align: left; background: #f5f5f5; padding: 10px; margin-top: 20px;">
+                ${e.message}
+              </pre>
+            </div>
+          `;
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
-</html> 
+</html>
