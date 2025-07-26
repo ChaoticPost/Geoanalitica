@@ -1,18 +1,13 @@
-from sqlalchemy import Boolean, Column, Integer, String, JSON
-from app.db.base import TimestampedBase
+from db.base import TimestampedBase
+from sqlalchemy import Column, String, Boolean, Integer
 
 
 class User(TimestampedBase):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    full_name = Column(String)
-    hashed_password = Column(String, nullable=False)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    full_name = Column(String(255))
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
-
-    # 2FA fields
-    totp_secret = Column(String, nullable=True)  # Секретный ключ для TOTP
-    totp_enabled = Column(Boolean, default=False)  # Включен ли 2FA
-    backup_codes = Column(JSON, nullable=True)  # Хеши резервных кодов
