@@ -2,10 +2,10 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func
-from app.api import deps
-from app.db.session import get_db
-from app.models.user import User
-from app.models.geo import GeoPoint, GeoPolygon
+from api.deps import get_current_active_user
+from db.session import get_db
+from models.user import User
+from models.geo import GeoPoint, GeoPolygon
 from geoalchemy2.functions import ST_Distance, ST_Contains, ST_Area
 
 router = APIRouter()
@@ -15,7 +15,7 @@ router = APIRouter()
 async def get_points_in_polygon(
     polygon_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Get all points within a specific polygon"""
     polygon = (
@@ -44,7 +44,7 @@ async def get_nearest_points(
     point_id: int,
     limit: int = 5,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Get nearest points to a specific point"""
     reference_point = (
@@ -76,7 +76,7 @@ async def get_nearest_points(
 async def get_polygon_area(
     polygon_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Calculate area of a polygon in square meters"""
     polygon = (
