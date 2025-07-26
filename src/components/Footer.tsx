@@ -24,7 +24,7 @@ export const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+        <footer className="bg-background border-t border-border">
             <motion.div
                 initial="hidden"
                 whileInView="visible"
@@ -37,27 +37,27 @@ export const Footer = () => {
                     <motion.div variants={itemAnimation} className="flex-1 min-w-[200px]">
                         <div className="flex items-center gap-2 mb-4">
                             <img src="/src/assets/images/icons/icon_geo.png" alt="GeoAnalitica" className="h-8 w-8" />
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <h3 className="text-2xl font-bold text-foreground">
                                 GeoAnalitica
                             </h3>
                         </div>
-                        <p className="text-gray-600 dark:text-gray-300 max-w-md mb-6">
+                        <p className="text-muted-foreground max-w-md mb-6">
                             Инновационные решения для анализа локаций и развития вашего бизнеса
                         </p>
                         <div className="space-y-3">
-                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                <MapPin className="h-5 w-5 text-red-500" />
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <MapPin className="h-5 w-5 text-primary" />
                                 <span>Москва, Пресненская наб., 12</span>
                             </div>
-                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                <Mail className="h-5 w-5 text-red-500" />
-                                <a href="mailto:info@geoanalitica.com" className="hover:text-red-500 dark:hover:text-red-400">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <Mail className="h-5 w-5 text-primary" />
+                                <a href="mailto:info@geoanalitica.com" className="hover:text-primary transition-colors">
                                     info@geoanalitica.com
                                 </a>
                             </div>
-                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                                <Phone className="h-5 w-5 text-red-500" />
-                                <a href="tel:+74951234567" className="hover:text-red-500 dark:hover:text-red-400">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <Phone className="h-5 w-5 text-primary" />
+                                <a href="tel:+74951234567" className="hover:text-primary transition-colors">
                                     +7 (495) 123-45-67
                                 </a>
                             </div>
@@ -66,22 +66,22 @@ export const Footer = () => {
 
                     {/* Продукт */}
                     <motion.div variants={itemAnimation} className="flex-1 min-w-[200px]">
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                        <h4 className="font-semibold text-foreground mb-4">
                             ПРОДУКТ
                         </h4>
                         <ul className="space-y-3">
                             <li>
-                                <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400">
+                                <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">
                                     Возможности
                                 </a>
                             </li>
                             <li>
-                                <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400">
+                                <a href="#pricing" className="text-muted-foreground hover:text-primary transition-colors">
                                     Цены
                                 </a>
                             </li>
                             <li>
-                                <a href="#demo" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400">
+                                <a href="#demo" className="text-muted-foreground hover:text-primary transition-colors">
                                     Демо
                                 </a>
                             </li>
@@ -90,22 +90,22 @@ export const Footer = () => {
 
                     {/* Компания */}
                     <motion.div variants={itemAnimation} className="flex-1 min-w-[200px]">
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                        <h4 className="font-semibold text-foreground mb-4">
                             КОМПАНИЯ
                         </h4>
                         <ul className="space-y-3">
                             <li>
-                                <a href="#about" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400">
+                                <a href="#about" className="text-muted-foreground hover:text-primary transition-colors">
                                     О нас
                                 </a>
                             </li>
                             <li>
-                                <Link to="/contact" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400">
+                                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">
                                     Контакты
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/privacy" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400">
+                                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
                                     Конфиденциальность
                                 </Link>
                             </li>
@@ -114,22 +114,22 @@ export const Footer = () => {
 
                     {/* Поддержка */}
                     <motion.div variants={itemAnimation} className="flex-1 min-w-[200px]">
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                        <h4 className="font-semibold text-foreground mb-4">
                             ПОДДЕРЖКА
                         </h4>
                         <ul className="space-y-3">
                             <li>
-                                <Link to="/faq" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400">
+                                <Link to="/faq" className="text-muted-foreground hover:text-primary transition-colors">
                                     FAQ
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/docs" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400">
+                                <Link to="/docs" className="text-muted-foreground hover:text-primary transition-colors">
                                     Документация
                                 </Link>
                             </li>
                             <li>
-                                <a href="#contact" className="text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400">
+                                <a href="#contact" className="text-muted-foreground hover:text-primary transition-colors">
                                     Связаться с нами
                                 </a>
                             </li>
@@ -140,9 +140,9 @@ export const Footer = () => {
                 {/* Copyright */}
                 <motion.div
                     variants={itemAnimation}
-                    className="pt-8 mt-8 border-t border-gray-200 dark:border-gray-800"
+                    className="pt-8 mt-8 border-t border-border"
                 >
-                    <p className="text-center text-gray-500 dark:text-gray-400">
+                    <p className="text-center text-muted-foreground">
                         © {currentYear} GeoAnalitica. Все права защищены.
                     </p>
                 </motion.div>
