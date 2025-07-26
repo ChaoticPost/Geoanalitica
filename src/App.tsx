@@ -1,31 +1,90 @@
-import { Routes, Route } from 'react-router-dom';
-import MainLayout from '@/layouts/MainLayout';
-import AuthLayout from '@/layouts/AuthLayout';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './providers/ThemeProvider';
+import { AuthProvider } from './providers/AuthProvider';
+import { MainLayout } from './layouts/MainLayout';
+import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { ContactPage } from './pages/ContactPage';
+import { AboutPage } from './pages/AboutPage';
+import ProfilePage from './pages/ProfilePage';
+import { useAuth } from './providers/AuthProvider';
 
-// Страницы
-import HomePage from '@/pages/HomePage';
-import AboutPage from '@/pages/AboutPage';
-import ContactPage from '@/pages/ContactPage';
-import LoginPage from '@/pages/LoginPage';
-import RegisterPage from '@/pages/RegisterPage';
+// Компонент для защищенных маршрутов
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? children : <Navigate to="/login" />;
+};
 
-function App() {
-  return (
-    <Routes>
-      {/* Основные страницы */}
-      <Route path="/" element={<MainLayout />}>
-        <Route index element={<HomePage />} />
-        <Route path="about" element={<AboutPage />} />
-        <Route path="contact" element={<ContactPage />} />
-      </Route>
+// Компонент для публичных маршрутов (доступных только неавторизованным)
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+    const { isAuthenticated } = useAuth();
+    return !isAuthenticated ? children : <Navigate to="/" />;
+};
 
-      {/* Страницы авторизации */}
-      <Route path="/auth" element={<AuthLayout />}>
-        <Route path="login" element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} />
-      </Route>
-    </Routes>
-  );
-}
+const AppRoutes = () => {
+    // Получаем начальный путь из localStorage
+    const initialPath = localStorage.getItem('initialPath');
+    if (initialPath) {
+        localStorage.removeItem('initialPath');
+    }
 
-export default App; 
+    return (
+        <Routes>
+            {/* Публичные маршруты (только для неавторизованных) */}
+            <Route path="/login" element={
+                <PublicRoute>
+                    <LoginPage />
+                </PublicRoute>
+            } />
+            <Route path="/register" element={
+                <PublicRoute>
+                    <RegisterPage />
+                </PublicRoute>
+            } />
+
+            {/* Защищенные маршруты */}
+            <Route path="/" element={
+                <ProtectedRoute>
+                    <MainLayout>
+                        <HomePage />
+                    </MainLayout>
+                </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+                <ProtectedRoute>
+                    <ProfilePage />
+                </ProtectedRoute>
+            } />
+            <Route path="/about" element={
+                <ProtectedRoute>
+                    <MainLayout>
+                        <AboutPage />
+                    </MainLayout>
+                </ProtectedRoute>
+            } />
+            <Route path="/contact" element={
+                <ProtectedRoute>
+                    <MainLayout>
+                        <ContactPage />
+                    </MainLayout>
+                </ProtectedRoute>
+            } />
+
+            {/* Редирект на начальный путь или на главную */}
+            <Route path="*" element={<Navigate to={initialPath || '/'} replace />} />
+        </Routes>
+    );
+};
+
+export const App = () => {
+    return (
+        <Router>
+            <ThemeProvider>
+                <AuthProvider>
+                    <AppRoutes />
+                </AuthProvider>
+            </ThemeProvider>
+        </Router>
+    );
+}; 
