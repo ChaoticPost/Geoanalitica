@@ -1,11 +1,11 @@
 from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api import deps
-from app.db.session import get_db
-from app.models.user import User
-from app.models.geo import GeoPoint, GeoPolygon
-from app.schemas.geo import (
+from api.deps import get_current_active_user
+from db.session import get_db
+from models.user import User
+from models.geo import GeoPoint, GeoPolygon
+from schemas.geo import (
     GeoPoint as GeoPointSchema,
     GeoPointCreate,
     GeoPolygon as GeoPolygonSchema,
@@ -22,7 +22,7 @@ async def create_point(
     *,
     db: AsyncSession = Depends(get_db),
     point_in: GeoPointCreate,
-    current_user: User = Depends(deps.get_current_active_user)
+    current_user: User = Depends(get_current_active_user)
 ) -> Any:
     """Create new point"""
     point = GeoPoint(
@@ -45,7 +45,7 @@ async def read_points(
     db: AsyncSession = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Retrieve points"""
     points = (
@@ -63,7 +63,7 @@ async def create_polygon(
     *,
     db: AsyncSession = Depends(get_db),
     polygon_in: GeoPolygonCreate,
-    current_user: User = Depends(deps.get_current_active_user)
+    current_user: User = Depends(get_current_active_user)
 ) -> Any:
     """Create new polygon"""
     coordinates = [(p.longitude, p.latitude) for p in polygon_in.coordinates]
@@ -88,7 +88,7 @@ async def read_polygons(
     db: AsyncSession = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Retrieve polygons"""
     polygons = (
