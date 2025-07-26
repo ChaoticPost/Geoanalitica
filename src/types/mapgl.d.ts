@@ -1,53 +1,40 @@
 declare module '@2gis/mapgl' {
-    export interface MapGLOptions {
+    export interface MapOptions {
         container: string | HTMLElement;
-        center: [number, number];
+        center: number[];
         zoom: number;
         key: string;
         style?: string;
-        pitch?: number;
-        rotation?: number;
-        zoomControl?: boolean;
+        disableRotation?: boolean;
     }
 
-    export default class Map {
-        constructor(options: MapGLOptions);
-        setCenter(center: [number, number]): void;
+    export class Map {
+        constructor(options: MapOptions);
+        destroy(): void;
+        setCenter(center: number[]): void;
         setZoom(zoom: number): void;
-        destroy(): void;
-        on(event: string, callback: Function): void;
-        off(event: string, callback: Function): void;
     }
 
-    export class Marker {
-        constructor(options?: {
-            coordinates: [number, number];
-            icon?: string;
-            size?: [number, number];
-            anchor?: [number, number];
-            color?: string;
-            label?: {
-                text: string;
-                offset?: [number, number];
-                color?: string;
-                fontSize?: number;
-            };
-        });
-        setCoordinates(coordinates: [number, number]): void;
-        remove(): void;
+    export function load(): Promise<typeof Map>;
+}
+
+declare module '@2gis/mapgl/global' {
+    export interface MapOptions {
+        container: string | HTMLElement;
+        center: number[];
+        zoom: number;
+        key: string;
+        style?: string;
+        disableRotation?: boolean;
     }
 
-    export class Clusterer {
-        constructor(map: Map, options?: {
-            radius?: number;
-            minZoom?: number;
-            maxZoom?: number;
-        });
-        load(points: Array<{
-            coordinates: [number, number];
-            type?: string;
-            color?: string;
-        }>): void;
-        destroy(): void;
+    export interface MapGL {
+        Map: new (options: MapOptions) => {
+            destroy(): void;
+            setCenter(center: number[]): void;
+            setZoom(zoom: number): void;
+        };
     }
+
+    export function load(): Promise<MapGL>;
 } 
