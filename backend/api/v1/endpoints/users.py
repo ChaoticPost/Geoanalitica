@@ -2,12 +2,12 @@ from typing import Any, List
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api import deps
-from app.core import security
-from app.core.config import settings
-from app.db.session import get_db
-from app.models.user import User
-from app.schemas.user import User, UserCreate, UserUpdate, Token
+from core import security
+from core.config import settings
+from db.session import get_db
+from models.user import User
+from schemas.user import User, UserCreate, UserUpdate, Token
+from api.deps import get_current_active_user
 
 router = APIRouter()
 
@@ -57,7 +57,7 @@ async def create_user(
 
 @router.get("/me", response_model=User)
 async def read_user_me(
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Get current user"""
     return current_user
@@ -70,7 +70,7 @@ async def update_user_me(
     password: str = Body(None),
     full_name: str = Body(None),
     email: str = Body(None),
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Update own user"""
     current_user_data = UserUpdate(
