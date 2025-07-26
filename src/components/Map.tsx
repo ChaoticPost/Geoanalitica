@@ -1,32 +1,43 @@
-import { useEffect } from 'react';
-import { useMap } from '../hooks/useMap';
-import { API_CONFIG } from '../config/api';
+import { useEffect, useRef } from 'react';
+import { apiConfig } from '../config/api';
+import { load } from '@2gis/mapgl/global';
 
 interface MapProps {
     className?: string;
-    center?: [number, number];
+    center?: number[];
     zoom?: number;
 }
 
 export const Map = ({
     className = '',
-    center = API_CONFIG.DEFAULT_CENTER,
-    zoom = API_CONFIG.DEFAULT_ZOOM
+    center = apiConfig.map.DEFAULT_CENTER,
+    zoom = apiConfig.map.DEFAULT_ZOOM
 }: MapProps) => {
-    const containerId = 'map';
-    const { map, isLoaded } = useMap({ containerId, center, zoom });
+    const containerRef = useRef<HTMLDivElement>(null);
+    const mapRef = useRef<any>(null);
 
     useEffect(() => {
-        // Здесь можно добавить дополнительную логику после загрузки карты
-        if (isLoaded && map) {
-            console.log('Map loaded successfully');
-        }
-    }, [isLoaded, map]);
+        if (!containerRef.current) return;
+
+        load().then((mapgl) => {
+            mapRef.current = new mapgl.Map({
+                container: containerRef.current!,
+                center,
+                zoom,
+                key: apiConfig.map.API_KEY,
+                style: apiConfig.map.STYLE,
+                disableRotation: true,
+            });
+        });
+
+        return () => {
+            if (mapRef.current) {
+                mapRef.current.destroy();
+            }
+        };
+    }, [center, zoom]);
 
     return (
-        <div
-            id={containerId}
-            className={`w-full h-full min-h-[400px] rounded-lg overflow-hidden ${className}`}
-        />
+        <div ref={containerRef} className={`w-full h-full ${className}`} />
     );
 }; 
