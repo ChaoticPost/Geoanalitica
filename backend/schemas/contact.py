@@ -1,11 +1,11 @@
-from pydantic import BaseModel, EmailStr, constr
+from pydantic import BaseModel, EmailStr
 
 
-class ContactRequest(BaseModel):
-    full_name: constr(min_length=2, max_length=100)
-    city: constr(min_length=2, max_length=100)
-    phone: constr(min_length=10, max_length=20)
+class ContactCreate(BaseModel):
+    full_name: str
+    city: str
+    phone: str
     email: EmailStr
-    company: str = ""
-    direction: str = "Геоаналитика"
-    description: constr(min_length=10, max_length=1000)
+    company: str | None = None
+    direction: str
+    description: str
