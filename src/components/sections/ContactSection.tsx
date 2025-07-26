@@ -183,13 +183,16 @@ export const ContactSection = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${API_URL}/api/contact/submit`, {
+            const response = await fetch(`${API_URL}/api/v1/contact/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    ...formData,
+                    // Убеждаемся, что телефон содержит код страны
+                    phone: formData.phone.startsWith('+') ? formData.phone : `+${formData.phone}`
+                })
             });
 
             const data = await response.json();
@@ -200,7 +203,7 @@ export const ContactSection = () => {
 
             resetForm();
             setShowSuccess(true);
-            toast.success('Заявка успешно отправлена!');
+            toast.success('Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.');
 
         } catch (error) {
             console.error('Ошибка при отправке формы:', error);
@@ -302,8 +305,8 @@ export const ContactSection = () => {
                                         value={getPhoneNumberWithoutCode(formData.phone)}
                                         onChange={handlePhoneChange}
                                         className={`w-full pl-[5.5rem] pr-4 py-3 rounded-xl bg-white/5 dark:bg-[#1E1E1E] border ${errors.phone
-                                                ? 'border-red-500'
-                                                : 'border-gray-200/20 dark:border-gray-700/30'
+                                            ? 'border-red-500'
+                                            : 'border-gray-200/20 dark:border-gray-700/30'
                                             } text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-red-500/50 dark:focus:ring-red-400/50 focus:border-red-500/30 transition-colors duration-200`}
                                         placeholder="(___) ___-__-__"
                                         required
