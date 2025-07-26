@@ -1,7 +1,7 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 
 interface Props {
-    children: ReactNode;
+    children?: ReactNode;
     fallback?: ReactNode;
 }
 
@@ -21,28 +21,17 @@ class ErrorBoundary extends Component<Props, State> {
     }
 
     public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error('ErrorBoundary caught an error:', error, errorInfo);
+        console.error('Uncaught error:', error, errorInfo);
     }
 
     public render() {
         if (this.state.hasError) {
             return this.props.fallback || (
-                <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                    <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
-                        <h2 className="text-2xl font-bold text-red-600 mb-4">Что-то пошло не так</h2>
-                        <p className="text-gray-600 mb-4">
-                            Произошла ошибка при загрузке компонента.
-                        </p>
-                        <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto">
-                            {this.state.error?.message}
-                        </pre>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                        >
-                            Перезагрузить страницу
-                        </button>
-                    </div>
+                <div className="error-boundary">
+                    <h2>Что-то пошло не так 😢</h2>
+                    <details style={{ whiteSpace: 'pre-wrap' }}>
+                        {this.state.error?.message}
+                    </details>
                 </div>
             );
         }
