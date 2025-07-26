@@ -1,8 +1,8 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError
-from app.core.security import verify_token
-from app.schemas.auth import UserResponse
+from core.security import verify_token
+from schemas.auth import UserResponse
+from db.session import get_db
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -14,32 +14,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserResponse:
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    try:
-        payload = verify_token(token)
-        if payload is None:
-            raise credentials_exception
-        user_id: str = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-    except JWTError:
+    user = await verify_token(token)
+    if not user:
         raise credentials_exception
-
-    # TODO: Get user from database
-    # user = get_user(user_id)
-    # if user is None:
-    #     raise credentials_exception
-
-    return UserResponse(
-        id=user_id,
-        email="example@example.com",  # Replace with actual user data
-        name="Example User",
-        role="user",
-    )
+    return user
 
 
 async def get_current_active_user(
     current_user: UserResponse = Depends(get_current_user),
 ) -> UserResponse:
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
