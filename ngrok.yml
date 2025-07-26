@@ -1,0 +1,14 @@
+version: "2"
+authtoken: 303u34Y5j3fDPqq2V9hQgC6WvSq_YVtV4Y8RyChUxmorEUJN
+web_addr: localhost:4040
+
+tunnels:
+  frontend:
+    addr: 3006
+    proto: http
+    host_header: rewrite
+
+  backend:
+    addr: 8000
+    proto: http
+    host_header: rewrite
