@@ -46,9 +46,7 @@ const plans = [
 export const PricingSection = () => {
     return (
         <section id="pricing" className="py-24 relative overflow-hidden">
-            {/* Декоративный фоновый элемент */}
-            <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-white dark:from-gray-900 dark:to-gray-800" />
-
+            {/* Убираем декоративный фоновый элемент */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -57,13 +55,13 @@ export const PricingSection = () => {
                     transition={{ duration: 0.5 }}
                     className="text-center mb-16"
                 >
-                    <span className="inline-block text-red-500 font-medium mb-4 px-4 py-1 bg-red-50 dark:bg-red-500/10 rounded-full">
+                    <span className="inline-block text-primary font-medium mb-4 px-4 py-1 bg-primary/5 dark:bg-primary/10 rounded-full">
                         Тарифы
                     </span>
-                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    <h2 className="text-4xl font-bold text-foreground mb-4">
                         Выберите свой план
                     </h2>
-                    <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    <p className="text-muted-foreground text-lg">
                         Начните бесплатно в рамках бета-тестирования или выберите план для бизнеса
                     </p>
                 </motion.div>
@@ -77,17 +75,17 @@ export const PricingSection = () => {
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1, duration: 0.5 }}
                             className={`
-                                relative rounded-[32px] p-8 h-full backdrop-blur-sm
+                                relative rounded-[32px] p-8 h-full
                                 ${plan.popular
-                                    ? 'bg-red-500 text-white shadow-[0_0_40px_rgba(239,68,68,0.2)]'
-                                    : 'bg-white/70 dark:bg-gray-900/70 hover:bg-white dark:hover:bg-gray-900 transition-colors duration-300'
+                                    ? 'bg-primary text-white shadow-xl'
+                                    : 'bg-card hover:bg-card/80 transition-colors duration-300'
                                 }
                             `}
                         >
                             {plan.beta && (
                                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                                    <span className="bg-white text-red-500 text-sm font-medium px-4 py-1 rounded-full shadow-sm">
-                                        Бета-версия
+                                    <span className="bg-background text-primary text-sm font-medium px-4 py-1 rounded-full shadow-sm">
+                                        Бета
                                     </span>
                                 </div>
                             )}
@@ -160,5 +158,5 @@ export const PricingSection = () => {
                 </motion.p>
             </div>
         </section>
-    )
-} 
+    );
+}; 
