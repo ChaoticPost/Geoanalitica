@@ -36,7 +36,7 @@ export const ThemeToggle = () => {
     return (
         <button
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background text-sm font-medium ring-offset-background transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+            className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-sm font-medium ring-offset-background transition-colors hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
             type="button"
             aria-label="Toggle theme"
         >
