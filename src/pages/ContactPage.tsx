@@ -1,11 +1,10 @@
-import { ContactSection } from '@/components/sections/ContactSection'
+import { type ReactElement } from 'react';
+import { ContactSection } from '@/components/sections/ContactSection';
 
-const ContactPage = () => {
+export const ContactPage = (): ReactElement => {
   return (
     <div className="min-h-screen">
       <ContactSection />
     </div>
-  )
-}
-
-export default ContactPage 
+  );
+}; 
