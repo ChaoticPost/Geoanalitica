@@ -16,27 +16,29 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 {label && (
                     <label
                         htmlFor={props.id}
-                        className="block text-base font-medium text-gray-700 dark:text-gray-200 mb-2"
+                        className="block text-base font-medium text-foreground mb-2"
                     >
                         {label}
                     </label>
                 )}
-                <div className="relative rounded-md shadow-sm">
+                <div className="relative rounded-md">
                     {Icon && (
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Icon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                            <Icon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                         </div>
                     )}
                     <input
                         type={type}
                         className={cn(
-                            "block w-full border border-gray-300 dark:border-gray-600 rounded-md",
-                            "bg-white dark:bg-gray-700 text-gray-900 dark:text-white",
-                            "placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500",
-                            "text-base py-3",
+                            "block w-full rounded-lg transition-colors duration-200",
+                            "bg-background border border-input",
+                            "text-foreground placeholder:text-muted-foreground",
+                            "focus:outline-none focus:ring-2 focus:ring-ring focus:border-input",
+                            "disabled:cursor-not-allowed disabled:opacity-50",
+                            "text-base py-2.5",
                             Icon ? "pl-12" : "pl-4",
                             rightIcon ? "pr-12" : "pr-4",
-                            error && "border-red-500 focus:ring-red-500 focus:border-red-500",
+                            error && "border-destructive focus:ring-destructive",
                             className
                         )}
                         ref={ref}
@@ -49,7 +51,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     )}
                 </div>
                 {error && (
-                    <p className="mt-2 text-sm text-red-600">{error}</p>
+                    <p className="mt-2 text-sm text-destructive">{error}</p>
                 )}
             </div>
         );
