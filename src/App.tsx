@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { type ReactElement } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { AuthProvider } from './providers/AuthProvider';
 import { MainLayout } from './layouts/MainLayout';
@@ -7,22 +8,25 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ContactPage } from './pages/ContactPage';
 import { AboutPage } from './pages/AboutPage';
-import ProfilePage from './pages/ProfilePage';
+import { ProfilePage } from './pages/ProfilePage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { useAuth } from './providers/AuthProvider';
+import { Toaster } from 'react-hot-toast';
 
 // Компонент для защищенных маршрутов
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }): ReactElement => {
     const { isAuthenticated } = useAuth();
-    return isAuthenticated ? children : <Navigate to="/login" />;
+    return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
 // Компонент для публичных маршрутов (доступных только неавторизованным)
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+const PublicRoute = ({ children }: { children: React.ReactNode }): ReactElement => {
     const { isAuthenticated } = useAuth();
-    return !isAuthenticated ? children : <Navigate to="/" />;
+    return !isAuthenticated ? <>{children}</> : <Navigate to="/profile" />;
 };
 
-const AppRoutes = () => {
+const AppRoutes = (): ReactElement => {
     // Получаем начальный путь из localStorage
     const initialPath = localStorage.getItem('initialPath');
     if (initialPath) {
@@ -31,6 +35,13 @@ const AppRoutes = () => {
 
     return (
         <Routes>
+            {/* Публичная главная страница */}
+            <Route path="/" element={
+                <MainLayout>
+                    <HomePage />
+                </MainLayout>
+            } />
+
             {/* Публичные маршруты (только для неавторизованных) */}
             <Route path="/login" element={
                 <PublicRoute>
@@ -42,15 +53,13 @@ const AppRoutes = () => {
                     <RegisterPage />
                 </PublicRoute>
             } />
+            <Route path="/forgot-password" element={
+                <PublicRoute>
+                    <ForgotPasswordPage />
+                </PublicRoute>
+            } />
 
             {/* Защищенные маршруты */}
-            <Route path="/" element={
-                <ProtectedRoute>
-                    <MainLayout>
-                        <HomePage />
-                    </MainLayout>
-                </ProtectedRoute>
-            } />
             <Route path="/profile" element={
                 <ProtectedRoute>
                     <ProfilePage />
@@ -71,20 +80,29 @@ const AppRoutes = () => {
                 </ProtectedRoute>
             } />
 
-            {/* Редирект на начальный путь или на главную */}
-            <Route path="*" element={<Navigate to={initialPath || '/'} replace />} />
+            {/* 404 страница */}
+            <Route path="*" element={<NotFoundPage />} />
         </Routes>
     );
 };
 
-export const App = () => {
+export const App = (): ReactElement => {
     return (
-        <Router>
-            <ThemeProvider>
-                <AuthProvider>
-                    <AppRoutes />
-                </AuthProvider>
-            </ThemeProvider>
-        </Router>
+        <ThemeProvider>
+            <AuthProvider>
+                <AppRoutes />
+                <Toaster
+                    position="top-center"
+                    toastOptions={{
+                        duration: 3000,
+                        style: {
+                            background: '#1E1E1E',
+                            color: '#fff',
+                            borderRadius: '12px',
+                        },
+                    }}
+                />
+            </AuthProvider>
+        </ThemeProvider>
     );
 }; 
