@@ -1,4 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
+import { ErrorPage } from '../pages/ErrorPage';
 
 interface Props {
     children?: ReactNode;
@@ -7,13 +8,13 @@ interface Props {
 
 interface State {
     hasError: boolean;
-    error: Error | null;
+    error: Error | undefined;
 }
 
 class ErrorBoundary extends Component<Props, State> {
     public state: State = {
         hasError: false,
-        error: null
+        error: undefined
     };
 
     public static getDerivedStateFromError(error: Error): State {
@@ -24,15 +25,17 @@ class ErrorBoundary extends Component<Props, State> {
         console.error('Uncaught error:', error, errorInfo);
     }
 
+    private handleReset = () => {
+        this.setState({ hasError: false, error: undefined });
+    };
+
     public render() {
         if (this.state.hasError) {
             return this.props.fallback || (
-                <div className="error-boundary">
-                    <h2>Что-то пошло не так 😢</h2>
-                    <details style={{ whiteSpace: 'pre-wrap' }}>
-                        {this.state.error?.message}
-                    </details>
-                </div>
+                <ErrorPage
+                    error={this.state.error}
+                    resetError={this.handleReset}
+                />
             );
         }
 
