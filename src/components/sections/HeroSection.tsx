@@ -1,10 +1,10 @@
-import { Button } from '@/components/ui/Button';
+import { type ReactElement } from 'react';
 import { motion } from 'framer-motion';
+import { Button } from '../ui/Button';
 
-export const HeroSection = () => {
+export const HeroSection = (): ReactElement => {
     return (
-        <section className="relative isolate min-h-[calc(100vh-4rem)] flex items-center justify-center bg-white dark:bg-[#0f0f0f]">
-            {/* Subtle gradient accents */}
+        <section className="relative isolate min-h-[calc(100vh-4rem)] flex items-center justify-center bg-white dark:bg-black">            {/* Subtle gradient accents */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.15 }}
