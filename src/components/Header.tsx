@@ -1,12 +1,15 @@
 import { Button } from '@/components/ui/Button';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import iconGeo from '@/assets/images/icons/icon_geo.png';
+import { useAuth } from '@/providers/AuthProvider';
 
 export const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { isAuthenticated, logout } = useAuth();
+    const location = useLocation();
 
     const scrollToDemo = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
@@ -15,6 +18,11 @@ export const Header = () => {
             demoSection.scrollIntoView({ behavior: 'smooth' });
         }
     };
+
+    // Не показываем навигацию на страницах входа и регистрации
+    if (location.pathname === '/login' || location.pathname === '/register') {
+        return null;
+    }
 
     return (
         <nav className="fixed top-0 left-0 w-full bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 z-50">
@@ -42,19 +50,38 @@ export const Header = () => {
                         </a>
                     </div>
 
-                    {/* Theme Toggle and CTA Button */}
+                    {/* Theme Toggle and Auth Buttons */}
                     <div className="hidden md:flex items-center space-x-4">
                         <ThemeToggle />
-                        <Link to="/auth/login">
-                            <Button variant="ghost" className="text-gray-600 dark:text-gray-300 hover:text-red-500 hover:bg-gray-200 dark:hover:text-white dark:hover:bg-gray-800">
-                                Войти
-                            </Button>
-                        </Link>
-                        <Link to="/auth/register">
-                            <Button variant="default" className="bg-red-500 hover:bg-red-600 text-white">
-                                Регистрация
-                            </Button>
-                        </Link>
+                        {isAuthenticated ? (
+                            <>
+                                <Link to="/profile">
+                                    <Button variant="ghost" className="text-gray-600 dark:text-gray-300 hover:text-red-500 hover:bg-gray-200 dark:hover:text-white dark:hover:bg-gray-800">
+                                        Профиль
+                                    </Button>
+                                </Link>
+                                <Button 
+                                    variant="default" 
+                                    className="bg-red-500 hover:bg-red-600 text-white"
+                                    onClick={logout}
+                                >
+                                    Выйти
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Link to="/login">
+                                    <Button variant="ghost" className="text-gray-600 dark:text-gray-300 hover:text-red-500 hover:bg-gray-200 dark:hover:text-white dark:hover:bg-gray-800">
+                                        Войти
+                                    </Button>
+                                </Link>
+                                <Link to="/register">
+                                    <Button variant="default" className="bg-red-500 hover:bg-red-600 text-white">
+                                        Регистрация
+                                    </Button>
+                                </Link>
+                            </>
+                        )}
                     </div>
 
                     {/* Mobile menu button */}
@@ -106,16 +133,35 @@ export const Header = () => {
                                 Демо
                             </a>
                             <div className="px-3 py-2">
-                                <Link to="/auth/login" className="block w-full mb-2">
-                                    <Button variant="ghost" className="w-full text-gray-600 dark:text-gray-300 hover:text-red-500 hover:bg-gray-200 dark:hover:text-white dark:hover:bg-gray-800">
-                                        Войти
-                                    </Button>
-                                </Link>
-                                <Link to="/auth/register" className="block w-full">
-                                    <Button variant="default" className="w-full bg-red-500 hover:bg-red-600 text-white">
-                                        Регистрация
-                                    </Button>
-                                </Link>
+                                {isAuthenticated ? (
+                                    <>
+                                        <Link to="/profile" className="block w-full mb-2">
+                                            <Button variant="ghost" className="w-full text-gray-600 dark:text-gray-300 hover:text-red-500 hover:bg-gray-200 dark:hover:text-white dark:hover:bg-gray-800">
+                                                Профиль
+                                            </Button>
+                                        </Link>
+                                        <Button 
+                                            variant="default" 
+                                            className="w-full bg-red-500 hover:bg-red-600 text-white"
+                                            onClick={logout}
+                                        >
+                                            Выйти
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link to="/login" className="block w-full mb-2">
+                                            <Button variant="ghost" className="w-full text-gray-600 dark:text-gray-300 hover:text-red-500 hover:bg-gray-200 dark:hover:text-white dark:hover:bg-gray-800">
+                                                Войти
+                                            </Button>
+                                        </Link>
+                                        <Link to="/register" className="block w-full">
+                                            <Button variant="default" className="w-full bg-red-500 hover:bg-red-600 text-white">
+                                                Регистрация
+                                            </Button>
+                                        </Link>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
