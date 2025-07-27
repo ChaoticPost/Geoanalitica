@@ -1,33 +1,17 @@
-import { Suspense, lazy } from 'react';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { Suspense, lazy, type ReactElement } from 'react';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 // Lazy load components with named exports
-const HeroSection = lazy(() =>
-    import('@/components/sections/HeroSection').then(module => ({ default: module.HeroSection }))
-);
-const PromoSection = lazy(() =>
-    import('@/components/sections/PromoSection').then(module => ({ default: module.PromoSection }))
-);
-const LocationAnalytics = lazy(() =>
-    import('@/components/sections/LocationAnalytics').then(module => ({ default: module.LocationAnalytics }))
-);
-const PricingSection = lazy(() =>
-    import('@/components/sections/PricingSection').then(module => ({ default: module.PricingSection }))
-);
-const ReviewsSection = lazy(() =>
-    import('@/components/sections/ReviewsSection').then(module => ({ default: module.ReviewsSection }))
-);
-const DemoSection = lazy(() =>
-    import('@/components/sections/DemoSection').then(module => ({ default: module.DemoSection }))
-);
-const FAQSection = lazy(() =>
-    import('@/components/sections/FAQSection').then(module => ({ default: module.FAQSection }))
-);
-const ContactSection = lazy(() =>
-    import('@/components/sections/ContactSection').then(module => ({ default: module.ContactSection }))
-);
+const HeroSection = lazy(() => import('../components/sections/HeroSection').then(module => ({ default: module.HeroSection })));
+const PromoSection = lazy(() => import('../components/sections/PromoSection').then(module => ({ default: module.PromoSection })));
+const LocationAnalytics = lazy(() => import('../components/sections/LocationAnalytics').then(module => ({ default: module.LocationAnalytics })));
+const PricingSection = lazy(() => import('../components/sections/PricingSection').then(module => ({ default: module.PricingSection })));
+const ReviewsSection = lazy(() => import('../components/sections/ReviewsSection').then(module => ({ default: module.ReviewsSection })));
+const DemoSection = lazy(() => import('../components/sections/DemoSection').then(module => ({ default: module.DemoSection })));
+const FAQSection = lazy(() => import('../components/sections/FAQSection').then(module => ({ default: module.FAQSection })));
+const ContactSection = lazy(() => import('../components/sections/ContactSection').then(module => ({ default: module.ContactSection })));
 
-const LoadingFallback = ({ name }: { name: string }) => (
+const LoadingFallback = ({ name }: { name: string }): ReactElement => (
     <div className="p-4 text-center">
         <div className="animate-pulse bg-gray-200 h-64 rounded-lg flex items-center justify-center">
             <p className="text-gray-500">Loading {name}...</p>
@@ -35,24 +19,24 @@ const LoadingFallback = ({ name }: { name: string }) => (
     </div>
 );
 
-const HomePage = () => {
+export const HomePage = (): ReactElement => {
     return (
         <div className="relative">
             <ErrorBoundary>
                 <Suspense fallback={<LoadingFallback name="HeroSection" />}>
-            <HeroSection />
+                    <HeroSection />
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="PromoSection" />}>
-            <PromoSection />
+                    <PromoSection />
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="LocationAnalytics" />}>
-            <LocationAnalytics />
+                    <LocationAnalytics />
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="PricingSection" />}>
-            <PricingSection />
+                    <PricingSection />
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="ReviewsSection" />}>
@@ -60,7 +44,7 @@ const HomePage = () => {
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="DemoSection" />}>
-            <DemoSection />
+                    <DemoSection />
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="FAQSection" />}>
@@ -68,11 +52,9 @@ const HomePage = () => {
                 </Suspense>
 
                 <Suspense fallback={<LoadingFallback name="ContactSection" />}>
-            <ContactSection />
+                    <ContactSection />
                 </Suspense>
             </ErrorBoundary>
         </div>
     );
-};
-
-export default HomePage; 
+}; 
