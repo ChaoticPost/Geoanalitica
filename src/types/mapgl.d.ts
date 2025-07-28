@@ -1,40 +1,24 @@
 declare module '@2gis/mapgl' {
-    export interface MapOptions {
-        container: string | HTMLElement;
-        center: number[];
-        zoom: number;
-        key: string;
-        style?: string;
-        disableRotation?: boolean;
-    }
+  export interface MapOptions {
+    center: [number, number];
+    zoom: number;
+    key: string;
+    styleZoom?: number;
+    style?: string;
+    zoomControl?: boolean;
+  }
 
-    export class Map {
-        constructor(options: MapOptions);
-        destroy(): void;
-        setCenter(center: number[]): void;
-        setZoom(zoom: number): void;
-    }
+  export interface MapglAPI {
+    Map: new (container: HTMLElement, options: MapOptions) => MapglMap;
+  }
 
-    export function load(): Promise<typeof Map>;
+  export interface MapglMap {
+    getZoom(): number;
+    setZoom(zoom: number): void;
+    destroy(): void;
+  }
+
+  export function load(): Promise<MapglAPI>;
 }
 
-declare module '@2gis/mapgl/global' {
-    export interface MapOptions {
-        container: string | HTMLElement;
-        center: number[];
-        zoom: number;
-        key: string;
-        style?: string;
-        disableRotation?: boolean;
-    }
-
-    export interface MapGL {
-        Map: new (options: MapOptions) => {
-            destroy(): void;
-            setCenter(center: number[]): void;
-            setZoom(zoom: number): void;
-        };
-    }
-
-    export function load(): Promise<MapGL>;
-} 
+export type Map = MapglMap; 
