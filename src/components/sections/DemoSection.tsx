@@ -5,11 +5,18 @@ import { motion } from 'framer-motion';
 import { Lightbulb, Plus, Minus, Maximize2, Store, Users, Building } from 'lucide-react';
 import { RecommendationsGrid } from './RecommendationsGrid';
 import { useNavigate } from 'react-router-dom';
+import { HeatScale } from '../ui/HeatScale';
 
 // 2GIS API Key
 const MAP_API_KEY = '2cb31629-9703-41ac-8398-e2da9fa78838';
 
 type AnalysisType = 'buyers' | 'competitors' | 'products';
+
+const scaleLabels = {
+  buyers: { min: 'Низкий трафик', max: 'Высокий трафик' },
+  competitors: { min: 'Мало конкурентов', max: 'Много конкурентов' },
+  products: { min: 'Узкий ассортимент', max: 'Широкий ассортимент' },
+};
 
 export const DemoSection = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -114,7 +121,7 @@ export const DemoSection = () => {
                           <span>район Коньково</span>
                         </div>
                       </div>
-                      
+
                       {/* Таб */}
                       <div className="px-5 py-4">
                         <button
@@ -147,31 +154,38 @@ export const DemoSection = () => {
                         </div>
                       </div>
                     </div>
-                  ) : null}
-
-                  {/* Верхняя панель с опциями анализа */}
-                  {!showTutorial && (
-                    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
-                      <div className="flex bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-200/20 dark:border-gray-700/20 p-1">
-                        {analysisOptions.map((option) => {
-                          const Icon = option.icon;
-                          return (
-                            <button
-                              key={option.id}
-                              onClick={() => setAnalysisType(option.id)}
-                              className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-                                analysisType === option.id
-                                  ? 'bg-primary text-white shadow-sm'
-                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
-                              }`}
-                            >
-                              <Icon className="w-4 h-4" />
-                              <span className="text-sm font-medium whitespace-nowrap">{option.label}</span>
-                            </button>
-                          );
-                        })}
+                  ) : (
+                    <>
+                      {/* Верхняя панель с опциями анализа */}
+                      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
+                        <div className="flex bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-200/20 dark:border-gray-700/20 p-1">
+                          {analysisOptions.map((option) => {
+                            const Icon = option.icon;
+                            return (
+                              <button
+                                key={option.id}
+                                onClick={() => setAnalysisType(option.id)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${analysisType === option.id
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                  }`}
+                              >
+                                <Icon className="w-4 h-4" />
+                                <span className="text-sm font-medium whitespace-nowrap">{option.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
+
+                      {/* Шкала интенсивности */}
+                      <div className="absolute bottom-20 left-4 z-20">
+                        <HeatScale
+                          min={scaleLabels[analysisType].min}
+                          max={scaleLabels[analysisType].max}
+                        />
+                      </div>
+                    </>
                   )}
 
                   {/* Кастомные кнопки зума в правом верхнем углу */}
