@@ -37,6 +37,12 @@ export const InlineNotification = ({
 }: InlineNotificationProps) => {
     const Icon = notificationIcons[type];
 
+    const handleClose = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose?.();
+    };
+
     return (
         <AnimatePresence>
             {show && (
@@ -58,7 +64,7 @@ export const InlineNotification = ({
                     </div>
                     {onClose && (
                         <button
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="absolute right-2 top-2 p-1 hover:bg-background/10 rounded-full transition-colors"
                         >
                             <X className="w-4 h-4" />
