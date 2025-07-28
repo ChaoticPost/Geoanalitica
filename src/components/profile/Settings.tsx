@@ -2,14 +2,31 @@ import { useState } from 'react';
 import { Button } from '../ui/Button';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { motion } from 'framer-motion';
-import { Settings as SettingsIcon, Bell, Map, Lock, ChevronRight } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Map, Lock, ChevronRight, User2, Mail, Building2, Phone, MapPin, Calendar, Edit } from 'lucide-react';
 
 interface SettingsProps {
     onChangePassword: () => void;
     onToggleNotifications: (enabled: boolean) => void;
+    user: {
+        name: string;
+        email: string;
+        organization: string;
+        phone: string;
+        position: string;
+        location: string;
+        joinDate: string;
+        avatar?: string;
+    };
+    onEditProfile: () => void;
 }
 
 const settingsSections = [
+    {
+        id: 'personal',
+        title: 'Личные данные',
+        icon: User2,
+        description: 'Управление личной информацией'
+    },
     {
         id: 'map',
         title: 'Карта по умолчанию',
@@ -30,7 +47,7 @@ const settingsSections = [
     }
 ];
 
-export const Settings = ({ onChangePassword, onToggleNotifications }: SettingsProps) => {
+export const Settings = ({ onChangePassword, onToggleNotifications, user, onEditProfile }: SettingsProps) => {
     const [radius, setRadius] = useState('1km');
     const [notifications, setNotifications] = useState(true);
 
@@ -57,7 +74,105 @@ export const Settings = ({ onChangePassword, onToggleNotifications }: SettingsPr
                 </div>
             </div>
 
-            {settingsSections.map((section, index) => {
+            {/* Личные данные */}
+            <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-card hover:shadow-lg dark:hover:shadow-primary/5 rounded-lg p-6 transition-all duration-200"
+            >
+                <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center space-x-4">
+                        <div className="relative">
+                            {user.avatar ? (
+                                <img
+                                    src={user.avatar}
+                                    alt={user.name}
+                                    className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
+                                />
+                            ) : (
+                                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <User2 size={32} className="text-primary" />
+                                </div>
+                            )}
+                            <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-foreground">{user.name}</h2>
+                            <p className="text-muted-foreground">{user.position}</p>
+                            <div className="flex items-center space-x-2 mt-2">
+                                <Building2 size={16} className="text-primary" />
+                                <span className="text-sm text-foreground">{user.organization}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <Button onClick={onEditProfile} variant="outline" className="group">
+                        <Edit size={16} className="mr-2 transition-transform group-hover:scale-110" />
+                        Редактировать
+                    </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-foreground">Контактная информация</h3>
+                        <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Mail size={16} className="text-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Email</p>
+                                    <p className="text-foreground">{user.email}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Phone size={16} className="text-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Телефон</p>
+                                    <p className="text-foreground">{user.phone}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <MapPin size={16} className="text-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Локация</p>
+                                    <p className="text-foreground">{user.location}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-foreground">Информация об аккаунте</h3>
+                        <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Building2 size={16} className="text-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Организация</p>
+                                    <p className="text-foreground">{user.organization}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Calendar size={16} className="text-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Дата регистрации</p>
+                                    <p className="text-foreground">{user.joinDate}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* Остальные настройки */}
+            {settingsSections.slice(1).map((section, index) => {
                 const Icon = section.icon;
                 return (
                     <motion.div
@@ -117,6 +232,7 @@ export const Settings = ({ onChangePassword, onToggleNotifications }: SettingsPr
                 );
             })}
 
+            {/* Тема оформления */}
             <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}

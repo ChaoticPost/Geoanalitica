@@ -1,4 +1,4 @@
-import { MapPin, FileText, CreditCard, Settings, Users, LogOut, Building2, ChevronRight } from 'lucide-react';
+import { MapPin, FileText, CreditCard, Settings, Building2, LogOut, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ProfileSidebarProps {
@@ -8,12 +8,6 @@ interface ProfileSidebarProps {
 }
 
 const menuItems = [
-    {
-        id: 'profile',
-        icon: Users,
-        label: 'Личные данные',
-        description: 'Управление профилем'
-    },
     {
         id: 'locations',
         icon: MapPin,
@@ -65,8 +59,8 @@ export const ProfileSidebar = ({ activeTab, onTabChange, onLogout }: ProfileSide
                         whileHover={{ scale: 1.01, x: 4 }}
                         whileTap={{ scale: 0.98 }}
                         className={`w-full flex flex-col items-start p-4 rounded-lg transition-all duration-200 ${isActive
-                                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                                : 'hover:bg-accent text-foreground'
+                            ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                            : 'hover:bg-accent text-foreground'
                             }`}
                     >
                         <div className="flex items-center w-full">
