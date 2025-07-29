@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { load } from '@2gis/mapgl';
-import type { MapglMap, MapOptions } from '@2gis/mapgl';
+import type { MapglMap } from '@2gis/mapgl';
 import { motion } from 'framer-motion';
 import { Lightbulb, Plus, Minus, Maximize2, Store, Users, Building } from 'lucide-react';
-import { RecommendationsGrid } from './RecommendationsGrid';
+import { RecommendationsGrid } from '@/components/sections/RecommendationsGrid';
 import { useNavigate } from 'react-router-dom';
-import { HeatScale } from '../ui/HeatScale';
+import { HeatScale } from '@/components/ui/HeatScale';
+import { HexagonLayer } from '@/components/map/HexagonLayer';
 
 // 2GIS API Key
 const MAP_API_KEY = '2cb31629-9703-41ac-8398-e2da9fa78838';
@@ -21,10 +22,25 @@ const scaleLabels = {
 export const DemoSection = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<MapglMap | null>(null);
+  const hexagonLayer = useRef<HexagonLayer | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
   const [showTutorial, setShowTutorial] = useState(true);
   const [analysisType, setAnalysisType] = useState<AnalysisType>('buyers');
+  const [isMapReady, setIsMapReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
+
+  // Определяем мобильное устройство
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const analysisOptions = [
     { id: 'buyers' as const, label: 'Покупатели', icon: Users },
@@ -41,48 +57,108 @@ export const DemoSection = () => {
     mapInstance.current.setZoom(newZoom);
   };
 
+  // Функция для инициализации слоя гексагонов
+  const initHexagonLayer = () => {
+    if (!mapInstance.current) return;
+
+    try {
+      // Очищаем предыдущий слой
+      if (hexagonLayer.current) {
+        hexagonLayer.current.destroy();
+        hexagonLayer.current = null;
+      }
+
+      // Яркие цвета для каждого типа анализа
+      const colors = {
+        buyers: '#ef4444',      // Красный
+        competitors: '#22c55e', // Зеленый
+        products: '#a855f7'     // Фиолетовый
+      };
+
+      // Создаем новый слой с выбранным цветом
+      hexagonLayer.current = new HexagonLayer(mapInstance.current, colors[analysisType]);
+    } catch (error) {
+      console.error('Error creating hexagon layer:', error);
+      setMapError('Ошибка при создании слоя гексагонов');
+    }
+  };
+
   useEffect(() => {
     let cleanup: (() => void) | undefined;
 
     const initializeMap = async () => {
       try {
-        console.log('Initializing 2GIS map...');
+        if (!mapContainer.current) return;
+
+        // Загружаем API
         const mapglAPI = await load();
 
-        if (mapInstance.current || !mapContainer.current) return;
+        // Если карта уже создана, не создаем новую
+        if (mapInstance.current) return;
 
-        console.log('Creating map instance...');
-
-        const mapOptions: MapOptions = {
+        // Создаем карту с фиксированным зумом
+        const map = new mapglAPI.Map(mapContainer.current, {
           center: [37.519352, 55.633520], // Коньково
-          zoom: 13,
+          zoom: isMobile ? 12 : 14, // Меньший зум для мобильных
           key: MAP_API_KEY,
-          styleZoom: 13,
-          style: 'c080bb6a-8134-4993-93a1-5b4d8c36a59b', // Темная тема для карты
-          zoomControl: false, // Отключаем стандартные контролы
-        };
+          styleZoom: isMobile ? 12 : 14,
+          style: 'c080bb6a-8134-4993-93a1-5b4d8c36a59b',
+          zoomControl: false,
+          maxZoom: 19,
+          minZoom: 5,
+        });
 
-        // Создаем карту
-        mapInstance.current = new mapglAPI.Map(mapContainer.current, mapOptions);
+        // Сохраняем инстанс карты
+        mapInstance.current = map;
 
-        console.log('Map initialized successfully');
+        // Ждем полной загрузки карты
+        map.on('load', () => {
+          setIsMapReady(true);
+          // Инициализируем слой только если не показываем обучение
+          if (!showTutorial) {
+            setTimeout(() => {
+              initHexagonLayer();
+            }, 100);
+          }
+        });
 
         cleanup = () => {
+          if (hexagonLayer.current) {
+            hexagonLayer.current.destroy();
+            hexagonLayer.current = null;
+          }
           if (mapInstance.current) {
-            console.log('Destroying map instance...');
             mapInstance.current.destroy();
             mapInstance.current = null;
           }
         };
       } catch (error) {
         console.error('Error initializing map:', error);
-        setMapError('Ошибка при загрузке карты. Пожалуйста, попробуйте позже.');
+        setMapError('Ошибка при загрузке карты');
       }
     };
 
     initializeMap();
     return () => cleanup?.();
-  }, []);
+  }, [isMobile]);
+
+  // Обновляем слой при закрытии обучающего меню
+  useEffect(() => {
+    if (!showTutorial && isMapReady && mapInstance.current) {
+      setTimeout(() => {
+        initHexagonLayer();
+      }, 100);
+    }
+  }, [showTutorial, isMapReady]);
+
+  // Обновляем при смене типа анализа
+  useEffect(() => {
+    if (!showTutorial && isMapReady && mapInstance.current) {
+      setTimeout(() => {
+        initHexagonLayer();
+      }, 100);
+    }
+  }, [analysisType, isMapReady]);
 
   return (
     <section id="demo" className="min-h-[calc(100vh-4rem)] flex items-center bg-white dark:bg-[#0f0f0f]">
@@ -96,7 +172,7 @@ export const DemoSection = () => {
 
         {/* Карта на всю ширину */}
         <div className="w-full">
-          <div className="relative w-full h-[500px] rounded-xl overflow-hidden">
+          <div className="relative w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden">
             <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
               {mapError ? (
                 <div className="absolute inset-0 flex items-center justify-center p-4 text-red-500">
@@ -107,11 +183,12 @@ export const DemoSection = () => {
                   <div
                     ref={mapContainer}
                     className="absolute inset-0 z-10"
+                    style={{ width: '100%', height: '100%' }}
                   />
                   {showTutorial ? (
                     // Обучающее меню
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-[360px] bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-200/20 dark:border-gray-700/20">
-                      <div className="p-5 border-b border-gray-200 dark:border-gray-700/50">
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-[90%] md:w-[360px] bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-200/20 dark:border-gray-700/20">
+                      <div className="p-4 md:p-5 border-b border-gray-200 dark:border-gray-700/50">
                         <div className="text-lg font-semibold text-gray-900 dark:text-white text-center">
                           ВЫ В ДЕМО-ВЕРСИИ КАРТЫ
                         </div>
@@ -123,7 +200,7 @@ export const DemoSection = () => {
                       </div>
 
                       {/* Таб */}
-                      <div className="px-5 py-4">
+                      <div className="px-4 md:px-5 py-4">
                         <button
                           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary/10 dark:bg-primary/20 text-primary rounded-lg"
                         >
@@ -132,7 +209,7 @@ export const DemoSection = () => {
                         </button>
                       </div>
 
-                      <div className="px-5 pb-5">
+                      <div className="px-4 md:px-5 pb-4 md:pb-5">
                         <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-4">
                           Чтобы посмотреть детальную статистику района,
                           нажмите на нужную область карты
@@ -157,17 +234,17 @@ export const DemoSection = () => {
                   ) : (
                     <>
                       {/* Верхняя панель с опциями анализа */}
-                      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
-                        <div className="flex bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-200/20 dark:border-gray-700/20 p-1">
+                      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 w-[90%] md:w-auto">
+                        <div className="flex flex-wrap md:flex-nowrap justify-center bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-200/20 dark:border-gray-700/20 p-1 gap-1">
                           {analysisOptions.map((option) => {
                             const Icon = option.icon;
                             return (
                               <button
                                 key={option.id}
                                 onClick={() => setAnalysisType(option.id)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${analysisType === option.id
-                                    ? 'bg-primary text-white shadow-sm'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-full transition-all flex-1 md:flex-none justify-center ${analysisType === option.id
+                                  ? 'bg-primary text-white shadow-sm'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                                   }`}
                               >
                                 <Icon className="w-4 h-4" />
@@ -179,10 +256,11 @@ export const DemoSection = () => {
                       </div>
 
                       {/* Шкала интенсивности */}
-                      <div className="absolute bottom-20 left-4 z-20">
+                      <div className={`absolute ${isMobile ? 'bottom-20 left-1/2 -translate-x-1/2' : 'bottom-24 left-4'} z-20`}>
                         <HeatScale
                           min={scaleLabels[analysisType].min}
                           max={scaleLabels[analysisType].max}
+                          className={isMobile ? 'transform scale-90' : ''}
                         />
                       </div>
                     </>
@@ -209,10 +287,10 @@ export const DemoSection = () => {
                   {/* Кнопка открытия полной карты */}
                   <button
                     onClick={() => navigate('/map')}
-                    className="absolute bottom-4 left-4 z-20 px-4 py-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium text-gray-900 dark:text-white border border-gray-200/20 dark:border-gray-700/20"
+                    className="absolute bottom-4 left-1/2 transform -translate-x-1/2 md:left-4 md:transform-none z-20 px-4 py-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-lg flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium text-gray-900 dark:text-white border border-gray-200/20 dark:border-gray-700/20"
                   >
                     <Maximize2 className="w-4 h-4" />
-                    Открыть полную карту
+                    <span className="whitespace-nowrap">Открыть полную карту</span>
                   </button>
                 </>
               )}

@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { toast } from 'react-hot-toast';
 import { CountrySelect } from '@/components/ui/CountrySelect';
 import { Country, countries } from '@/utils/countries';
-import InputMask from 'react-input-mask';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import { CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { MotionWrapper } from '@/components/ui/MotionWrapper';
 import 'flag-icons/css/flag-icons.min.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -40,6 +41,7 @@ const initialFormData: ContactFormData = {
 };
 
 export const ContactSection = () => {
+    const formRef = useRef<HTMLFormElement>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState<ContactFormData>(initialFormData);
     const [errors, setErrors] = useState<ValidationErrors>({});
@@ -221,7 +223,7 @@ export const ContactSection = () => {
 
     return (
         <section id="contact" className="py-16 bg-white dark:bg-[#121212] relative overflow-hidden">
-            <motion.div
+            <MotionWrapper
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -229,7 +231,7 @@ export const ContactSection = () => {
                 className="max-w-6xl mx-auto px-4"
             >
                 <div className="flex flex-col lg:flex-row gap-12 items-start">
-                    <motion.div
+                    <MotionWrapper
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
@@ -246,15 +248,15 @@ export const ContactSection = () => {
                                 className="w-64 h-auto mt-8 hidden lg:block"
                             />
                         </div>
-                    </motion.div>
+                    </MotionWrapper>
 
-                    <motion.form
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.4 }}
-                        viewport={{ once: true }}
+                    <form
+                        ref={formRef}
                         onSubmit={handleSubmit}
-                        className="lg:w-1/2 space-y-4 w-full"
+                        className="lg:w-1/2 space-y-4 w-full opacity-0 transform translate-x-5"
+                        style={{
+                            animation: 'fadeInRight 0.5s ease-out 0.4s forwards'
+                        }}
                     >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="flex flex-col">
@@ -297,20 +299,12 @@ export const ContactSection = () => {
                                             onPhoneCodeChange={handlePhoneCodeChange}
                                         />
                                     </div>
-                                    <InputMask
-                                        mask="(999) 999-99-99"
-                                        maskChar="_"
-                                        type="tel"
-                                        name="phone"
+                                    <PhoneInput
                                         value={getPhoneNumberWithoutCode(formData.phone)}
                                         onChange={handlePhoneChange}
-                                        className={`w-full pl-[5.5rem] pr-4 py-3 rounded-xl bg-white/5 dark:bg-[#1E1E1E] border ${errors.phone
-                                            ? 'border-red-500'
-                                            : 'border-gray-200/20 dark:border-gray-700/30'
-                                            } text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-red-500/50 dark:focus:ring-red-400/50 focus:border-red-500/30 transition-colors duration-200`}
-                                        placeholder="(___) ___-__-__"
+                                        className="pl-[5.5rem]"
+                                        error={!!errors.phone}
                                         required
-                                        alwaysShowMask
                                     />
                                 </div>
                                 {renderError('phone')}
@@ -377,7 +371,7 @@ export const ContactSection = () => {
                         </Button>
 
                         {showSuccess && (
-                            <motion.div
+                            <MotionWrapper
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
@@ -387,11 +381,11 @@ export const ContactSection = () => {
                                 <span className="text-green-700 dark:text-green-300">
                                     Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.
                                 </span>
-                            </motion.div>
+                            </MotionWrapper>
                         )}
-                    </motion.form>
+                    </form>
                 </div>
-            </motion.div>
+            </MotionWrapper>
         </section>
     );
 }; 

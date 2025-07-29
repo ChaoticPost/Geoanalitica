@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { EmailInput } from '../components/ui/EmailInput';
@@ -15,6 +15,11 @@ export const LoginPage = () => {
     const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showGoogleError, setShowGoogleError] = useState(false);
+
+    // Используем useCallback для предотвращения создания новой функции при каждом рендере
+    const handleEmailError = useCallback((error: string | undefined) => {
+        setErrors(prev => ({ ...prev, email: error }));
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,9 +57,7 @@ export const LoginPage = () => {
                             value={email}
                             onChange={setEmail}
                             error={errors.email}
-                            onErrorChange={(error) =>
-                                setErrors(prev => ({ ...prev, email: error }))
-                            }
+                            onErrorChange={handleEmailError}
                         />
 
                         <div>
