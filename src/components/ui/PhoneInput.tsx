@@ -1,7 +1,7 @@
 import React, { forwardRef, useRef, useState, useEffect } from 'react';
 import { cn } from '@/utils/cn';
 
-interface PhoneInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface PhoneInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
     value: string;
     onChange: (value: string) => void;
     className?: string;
@@ -38,7 +38,6 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const input = e.target.value;
             const digits = input.replace(/\D/g, '').slice(0, 10); // Ограничиваем 10 цифрами
-            const formatted = formatPhoneNumber(digits);
 
             // Сохраняем позицию курсора
             const currentCursorPosition = e.target.selectionStart || 0;

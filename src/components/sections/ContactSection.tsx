@@ -124,8 +124,7 @@ export const ContactSection = () => {
         validateField(name, value);
     };
 
-    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { value } = e.target;
+    const handlePhoneChange = (value: string) => {
         // Получаем только цифры из введенного номера
         const digitsOnly = value.replace(/\D/g, '');
         setFormData(prev => ({
