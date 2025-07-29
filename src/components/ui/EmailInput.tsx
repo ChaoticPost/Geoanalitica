@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Input } from './Input';
 
 interface EmailInputProps {
@@ -20,20 +20,24 @@ export const EmailInput = ({
     error,
     onErrorChange
 }: EmailInputProps) => {
-    const [localError, setLocalError] = useState<string | undefined>(error);
-
-    const validateEmail = (email: string): string | undefined => {
-        if (email && !email.includes('@')) {
+    // Валидация происходит только при изменении value
+    const validateEmail = useCallback((email: string): string | undefined => {
+        if (!email) return undefined;
+        if (!email.includes('@')) {
             return 'Email должен содержать символ @';
         }
         return undefined;
-    };
+    }, []);
 
-    useEffect(() => {
-        const validationError = validateEmail(value);
-        setLocalError(validationError);
+    // Обработчик изменения значения
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        onChange(newValue);
+
+        // Валидируем и отправляем ошибку наверх
+        const validationError = validateEmail(newValue);
         onErrorChange?.(validationError);
-    }, [value, onErrorChange]);
+    };
 
     return (
         <div className="space-y-2">
@@ -45,14 +49,14 @@ export const EmailInput = ({
             <Input
                 type="email"
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={handleChange}
                 placeholder={placeholder}
-                className={`w-full px-4 py-3 rounded-xl bg-white/10 dark:bg-gray-900/50 border ${localError ? 'border-red-500' : 'border-gray-200/20 dark:border-gray-700/30'
+                className={`w-full px-4 py-3 rounded-xl bg-white/10 dark:bg-gray-900/50 border ${error ? 'border-red-500' : 'border-gray-200/20 dark:border-gray-700/30'
                     } text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-red-500/50 dark:focus:ring-red-400/50 focus:border-transparent transition-colors duration-200 ${className}`}
             />
-            {localError && (
+            {error && (
                 <p className="text-sm text-destructive">
-                    {localError}
+                    {error}
                 </p>
             )}
         </div>
