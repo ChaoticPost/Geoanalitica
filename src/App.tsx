@@ -60,49 +60,61 @@ const AppRoutes = (): ReactElement => {
     return (
         <Routes>
             {/* Публичная главная страница */}
-            <Route path="/" element={
+            <Route index element={
                 <MainLayout>
                     <HomePage />
                 </MainLayout>
             } />
 
             {/* Публичные маршруты (только для неавторизованных) */}
-            <Route path="/login" element={
-                <PublicRoute>
-                    <LoginPage />
-                </PublicRoute>
-            } />
-            <Route path="/register" element={
-                <PublicRoute>
-                    <RegisterPage />
-                </PublicRoute>
-            } />
-            <Route path="/forgot-password" element={
-                <PublicRoute>
-                    <ForgotPasswordPage />
-                </PublicRoute>
-            } />
+            <Route path="auth">
+                <Route path="login" element={
+                    <PublicRoute>
+                        <LoginPage />
+                    </PublicRoute>
+                } />
+                <Route path="register" element={
+                    <PublicRoute>
+                        <RegisterPage />
+                    </PublicRoute>
+                } />
+                <Route path="forgot-password" element={
+                    <PublicRoute>
+                        <ForgotPasswordPage />
+                    </PublicRoute>
+                } />
+            </Route>
 
             {/* Защищенные маршруты */}
-            <Route path="/profile" element={
-                <ProtectedRoute>
-                    <ProfilePage />
-                </ProtectedRoute>
-            } />
-            <Route path="/about" element={
-                <ProtectedRoute>
-                    <MainLayout>
-                        <AboutPage />
-                    </MainLayout>
-                </ProtectedRoute>
-            } />
-            <Route path="/contact" element={
-                <ProtectedRoute>
-                    <MainLayout>
-                        <ContactPage />
-                    </MainLayout>
-                </ProtectedRoute>
-            } />
+            <Route path="app">
+                <Route path="profile" element={
+                    <ProtectedRoute>
+                        <ProfilePage />
+                    </ProtectedRoute>
+                } />
+                <Route path="about" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <AboutPage />
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="contact" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <ContactPage />
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+            </Route>
+
+            {/* Редиректы для старых путей */}
+            <Route path="login" element={<Navigate to="/auth/login" replace />} />
+            <Route path="register" element={<Navigate to="/auth/register" replace />} />
+            <Route path="forgot-password" element={<Navigate to="/auth/forgot-password" replace />} />
+            <Route path="profile" element={<Navigate to="/app/profile" replace />} />
+            <Route path="about" element={<Navigate to="/app/about" replace />} />
+            <Route path="contact" element={<Navigate to="/app/contact" replace />} />
 
             {/* 404 страница */}
             <Route path="*" element={<NotFoundPage />} />

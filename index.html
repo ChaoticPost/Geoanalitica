@@ -10,14 +10,29 @@
     <meta name="description" content="Геоаналитика для вашего бизнеса - анализ локаций и конкурентов" />
     <title>Геоаналитика</title>
 
-    <!-- Preload fonts -->
-    <link
-      rel="preload"
-      href="/src/assets/fonts/inter-var-latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://mapgl.2gis.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Load Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font loading -->
+    <style>
+      :root {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+          'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+          'Helvetica Neue', sans-serif;
+      }
+      @supports (font-variation-settings: normal) {
+        :root {
+          font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+            'Helvetica Neue', sans-serif;
+        }
+      }
+    </style>
 
     <!-- Ngrok handler -->
     <script>
