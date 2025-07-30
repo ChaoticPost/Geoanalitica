@@ -29,19 +29,26 @@ window.addEventListener('error', (event) => {
     event.stopPropagation();
 
     const img = event.target;
-    // Заменяем битое изображение на placeholder или скрываем его
-    if (img.parentElement) {
-      img.style.display = 'none';
-      // Если есть атрибут alt, используем его первые буквы как placeholder
-      if (img.alt) {
-        const initials = img.alt
-          .split(' ')
-          .map(word => word[0])
-          .join('')
-          .toUpperCase();
-        img.parentElement.textContent = initials;
-        img.parentElement.classList.add('text-primary', 'text-sm', 'font-medium');
+    try {
+      // Заменяем битое изображение на placeholder или скрываем его
+      if (img.parentElement) {
+        img.style.display = 'none';
+        // Если есть атрибут alt, используем его первые буквы как placeholder
+        if (img.alt) {
+          const initials = img.alt
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase();
+
+          const placeholderDiv = document.createElement('div');
+          placeholderDiv.textContent = initials;
+          placeholderDiv.className = 'text-primary text-sm font-medium';
+          img.parentElement.appendChild(placeholderDiv);
+        }
       }
+    } catch (error) {
+      console.warn('Error handling broken image:', error);
     }
     return true;
   }
