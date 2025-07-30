@@ -10,6 +10,7 @@ declare module '@2gis/mapgl/types' {
     zoomControl?: boolean;
     maxZoom?: number;
     minZoom?: number;
+    maxBounds?: LngLatBoundsArray;
   }
 
   export interface PolygonOptions {
@@ -18,6 +19,17 @@ declare module '@2gis/mapgl/types' {
     strokeColor?: string;
     strokeWidth?: number;
     fillOpacity?: number;
+    interactive?: boolean;
+    zIndex?: number;
+  }
+
+  export interface MarkerOptions {
+    coordinates: LngLatArray;
+    icon?: string;
+    size?: number;
+    color?: string;
+    interactive?: boolean;
+    zIndex?: number;
   }
 
   export interface MapglEvent {
@@ -35,6 +47,7 @@ declare module '@2gis/mapgl/types' {
     on(event: string, handler: EventHandler): void;
     off(event: string, handler: EventHandler): void;
     addPolygon(options: PolygonOptions): { destroy: () => void };
+    addMarker(options: MarkerOptions): { destroy: () => void };
   }
 
   export class Map implements MapglMap {
@@ -46,6 +59,7 @@ declare module '@2gis/mapgl/types' {
     on(event: string, handler: EventHandler): void;
     off(event: string, handler: EventHandler): void;
     addPolygon(options: PolygonOptions): { destroy: () => void };
+    addMarker(options: MarkerOptions): { destroy: () => void };
   }
 }
 
