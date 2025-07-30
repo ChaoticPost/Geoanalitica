@@ -1,0 +1,161 @@
+import * as h3 from 'h3-js';
+import type { Map as MapGL, LngLatArray } from '@2gis/mapgl/types';
+
+export interface Point {
+  lat: number;
+  lng: number;
+}
+
+// Получаем оптимальное разрешение H3 в зависимости от зума карты
+const getOptimalResolution = (zoom: number): number => {
+  // H3 resolution mapping based on zoom level
+  if (zoom <= 9) return 7;  // Увеличили базовое разрешение
+  if (zoom <= 11) return 8;
+  if (zoom <= 13) return 9;
+  if (zoom <= 15) return 10;
+  return 11;
+};
+
+// Получаем цвет для гексагона
+const getColor = (): string => {
+  return 'rgba(51, 136, 255, 0.2)'; // Полупрозрачный синий
+};
+
+// Проверяем валидность координат
+const isValidCoordinate = (lat: number, lng: number): boolean => {
+  return (
+    typeof lat === 'number' && 
+    typeof lng === 'number' && 
+    !isNaN(lat) && 
+    !isNaN(lng) && 
+    lat >= -90 && 
+    lat <= 90 && 
+    lng >= -180 && 
+    lng <= 180
+  );
+};
+
+// Создаем слой гексагонов
+export const createHexagonLayer = (
+  map: MapGL,
+  _points: Point[], // Игнорируем points, так как создаем равномерную сетку
+  onError: (error: string) => void
+) => {
+  console.log('Creating hexagon layer');
+  
+  const polygons: Array<{ destroy: () => void }> = [];
+  let isDestroyed = false;
+  
+  const updateGrid = () => {
+    if (isDestroyed) return;
+
+    try {
+      console.log('Starting grid update');
+      
+      // Очищаем старые полигоны
+      polygons.forEach(polygon => polygon.destroy());
+      polygons.length = 0;
+      
+      // Получаем границы карты
+      const bounds = map.getBounds();
+      const [[swLng, swLat], [neLng, neLat]] = bounds;
+      
+      console.log('Map bounds:', { swLat, swLng, neLat, neLng });
+      
+      // Получаем зум и определяем размер гексагонов
+      const zoom = map.getZoom();
+      const resolution = getOptimalResolution(zoom);
+      
+      console.log('Map zoom and resolution:', { zoom, resolution });
+
+      // Создаем базовый гексагон в центре
+      const centerLat = (swLat + neLat) / 2;
+      const centerLng = (swLng + neLng) / 2;
+      const centerHex = h3.latLngToCell(centerLat, centerLng, resolution);
+      
+      console.log('Center hex:', { centerLat, centerLng, centerHex });
+
+      // Получаем кольца гексагонов
+      const ringSize = Math.max(2, Math.ceil((20 - zoom))); // Увеличили минимальный размер кольца
+      const hexagons = h3.gridDisk(centerHex, ringSize);
+      
+      console.log('Generated hexagons:', { count: hexagons.length, ringSize });
+
+      // Фильтруем гексагоны по видимой области
+      const visibleHexagons = hexagons.filter(hexId => {
+        const hexBounds = h3.cellToBoundary(hexId);
+        return hexBounds.some(([lat, lng]) => 
+          lat >= swLat && lat <= neLat && lng >= swLng && lng <= neLng
+        );
+      });
+
+      console.log('Visible hexagons:', visibleHexagons.length);
+
+      // Создаем полигоны для каждого гексагона
+      visibleHexagons.forEach(hexId => {
+        try {
+          // Получаем границы гексагона
+          const boundaries = h3.cellToBoundary(hexId);
+          
+          // Преобразуем координаты для 2GIS MapGL
+          const coordinates = boundaries.map(([lat, lng]) => {
+            if (!isValidCoordinate(lat, lng)) {
+              console.warn('Invalid coordinate:', { lat, lng });
+              return null;
+            }
+            return [lng, lat] as LngLatArray;
+          }).filter((coord): coord is LngLatArray => coord !== null);
+
+          if (coordinates.length < 6) { // Должно быть 6 точек для гексагона
+            console.warn('Invalid hexagon coordinates:', coordinates.length);
+            return;
+          }
+
+          // Замыкаем полигон
+          coordinates.push(coordinates[0]);
+          
+          // Создаем полигон
+          const polygon = map.addPolygon({
+            coordinates: [coordinates],
+            color: getColor(),
+            strokeColor: '#FFFFFF',
+            strokeWidth: 1,
+            fillOpacity: 0.5
+          });
+          
+          polygons.push(polygon);
+        } catch (error) {
+          console.error('Error creating polygon for hexagon:', { hexId, error });
+        }
+      });
+      
+      console.log('Created polygons:', polygons.length);
+    } catch (error) {
+      console.error('Error updating grid:', error);
+      onError('Ошибка при обновлении сетки гексагонов');
+    }
+  };
+  
+  // Обновляем сетку при изменении границ карты
+  const boundsChangeHandler = () => {
+    console.log('Map bounds changed, updating grid');
+    updateGrid();
+  };
+  
+  map.on('moveend', boundsChangeHandler);
+  
+  // Создаем начальную сетку
+  console.log('Creating initial grid');
+  updateGrid();
+  
+  return {
+    destroy: () => {
+      console.log('Destroying hexagon layer');
+      isDestroyed = true;
+      map.off('moveend', boundsChangeHandler);
+      polygons.forEach(polygon => polygon.destroy());
+      polygons.length = 0;
+    },
+    update: updateGrid
+  };
+};
