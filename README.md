@@ -111,7 +111,7 @@ cd backend
 
 ### Frontend
 
-\`\`\`
+```
 src/
 ├── assets/          # Статические ресурсы
 ├── components/      # React компоненты
@@ -130,11 +130,11 @@ src/
 ├── styles/         # CSS стили
 ├── types/          # TypeScript типы
 └── utils/          # Вспомогательные функции
-\`\`\`
+```
 
 ### Backend
 
-\`\`\`
+```
 backend/
 ├── api/           # API endpoints
 │   └── v1/        # API версия 1
@@ -144,7 +144,7 @@ backend/
 ├── schemas/       # Pydantic схемы
 ├── services/      # Бизнес-логика
 └── tests/         # Тесты
-\`\`\`
+```
 
 ## API Документация
 
