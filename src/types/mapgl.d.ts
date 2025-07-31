@@ -26,8 +26,16 @@ declare module '@2gis/mapgl/types' {
   export interface MarkerOptions {
     coordinates: LngLatArray;
     icon?: string;
-    size?: number;
-    color?: string;
+    size?: [number, number];
+    anchor?: [number, number];
+    label?: {
+      text: string;
+      offset?: [number, number];
+      fontSize?: number;
+      color?: string;
+      haloColor?: string;
+      haloRadius?: number;
+    };
     interactive?: boolean;
     zIndex?: number;
   }
@@ -46,8 +54,6 @@ declare module '@2gis/mapgl/types' {
     getBounds(): LngLatBoundsArray;
     on(event: string, handler: EventHandler): void;
     off(event: string, handler: EventHandler): void;
-    addPolygon(options: PolygonOptions): { destroy: () => void };
-    addMarker(options: MarkerOptions): { destroy: () => void };
   }
 
   export class Map implements MapglMap {
@@ -58,16 +64,28 @@ declare module '@2gis/mapgl/types' {
     getBounds(): LngLatBoundsArray;
     on(event: string, handler: EventHandler): void;
     off(event: string, handler: EventHandler): void;
-    addPolygon(options: PolygonOptions): { destroy: () => void };
-    addMarker(options: MarkerOptions): { destroy: () => void };
+  }
+
+  export class Polygon {
+    constructor(map: Map, options: PolygonOptions);
+    destroy(): void;
+    on(event: string, handler: EventHandler): void;
+  }
+
+  export class Marker {
+    constructor(map: Map, options: MarkerOptions);
+    destroy(): void;
+    on(event: string, handler: EventHandler): void;
   }
 }
 
 declare module '@2gis/mapgl' {
-  import { Map, MapGLOptions } from '@2gis/mapgl/types';
+  import { Map, MapGLOptions, Polygon, Marker } from '@2gis/mapgl/types';
 
   export interface MapglAPI {
     Map: new (container: HTMLElement, options: MapGLOptions) => Map;
+    Polygon: new (map: Map, options: any) => Polygon;
+    Marker: new (map: Map, options: any) => Marker;
   }
 
   export function load(): Promise<MapglAPI>;
