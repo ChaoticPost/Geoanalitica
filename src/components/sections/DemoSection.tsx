@@ -1,33 +1,31 @@
 import { useEffect, useRef, useState } from 'react';
-import { load } from '@2gis/mapgl';
-import type { Map as MapGL, MapGLOptions } from '@2gis/mapgl/types';
-import { Plus, Minus } from 'lucide-react';
-import { HeatScale } from '@/components/ui/HeatScale';
-import {
-  KOPTEVO_BOUNDS,
-  KOPTEVO_CENTER,
-  type CianProperty,
-  createPropertyMarkers
-} from '@/utils/cianUtils';
+import type { CianProperty } from '@/utils/cianDataLoader';
+
+
+import { loadCianData, KOPTEVO_CENTER, KOPTEVO_POLYGON } from '@/utils/cianDataLoader';
+import { createPropertyMarkers, type PropertyMarker } from '@/utils/markerUtils';
+import { getBuildingBoundaries, createBuildingPolygon } from '@/utils/buildingBoundaries';
+import { createHexagonLayer, type HexagonLayer } from '@/utils/hexagonUtils';
+import { createZoneClickHandler } from '@/utils/zoneUtils';
 
 // 2GIS API Key
 const MAP_API_KEY = '2a1e9263-06de-4f55-89e4-985684639490';
 
-// Типы для 2GIS MapGL
-type LngLatArray = [number, number];
-type LngLatBoundsArray = [LngLatArray, LngLatArray];
-
-export const DemoSection = () => {
+const DemoSection = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<MapGL | null>(null);
-  const markersRef = useRef<Array<{ destroy: () => void }>>([]);
+  const mapInstance = useRef<any>(null);
+  const markersRef = useRef<PropertyMarker[]>([]);
   const [mapError, setMapError] = useState<string | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState<CianProperty | null>(null);
   const [properties, setProperties] = useState<CianProperty[]>([]);
   const [showDemoModal, setShowDemoModal] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('Ритейл');
+  const [selectedCategory] = useState('Ритейл');
+  const [showHexagons, setShowHexagons] = useState(false);
+  const [priceType, setPriceType] = useState<'perMeter' | 'total'>('perMeter');
+
+  const buildingPolygonRef = useRef<{ destroy: () => void } | null>(null);
+  const hexagonLayerRef = useRef<HexagonLayer | null>(null);
 
   // Определяем мобильное устройство
   useEffect(() => {
@@ -42,38 +40,19 @@ export const DemoSection = () => {
 
   // Загрузка данных ЦИАН
   useEffect(() => {
-    const loadCianData = async () => {
+    const loadData = async () => {
       try {
-        // TODO: Здесь будет загрузка реальных данных
-        const mockData: CianProperty[] = [
-          {
-            url: 'https://cian.ru/1',
-            area: 85,
-            pricePerMeter: 165000,
-            location: { lat: 55.8358, lng: 37.5268 }
-          },
-          {
-            url: 'https://cian.ru/2',
-            area: 120,
-            pricePerMeter: 190000,
-            location: { lat: 55.8398, lng: 37.5318 }
-          },
-          {
-            url: 'https://cian.ru/3',
-            area: 65,
-            pricePerMeter: 170000,
-            location: { lat: 55.8338, lng: 37.5428 }
-          },
-          // Добавьте больше тестовых данных
-        ];
-        setProperties(mockData);
+        console.log('Loading CIAN data...');
+        const data = await loadCianData();
+        console.log('Loaded CIAN data:', data.length, 'properties');
+        setProperties(data);
       } catch (error) {
         console.error('Error loading CIAN data:', error);
         setMapError('Ошибка при загрузке данных ЦИАН');
       }
     };
 
-    loadCianData();
+    loadData();
   }, []);
 
   // Инициализация карты
@@ -81,50 +60,61 @@ export const DemoSection = () => {
     let mounted = true;
 
     const initializeMap = async () => {
+      // Очищаем предыдущую карту
       if (mapInstance.current) {
         markersRef.current.forEach(marker => marker.destroy());
         markersRef.current = [];
-        mapInstance.current.destroy();
+        if (hexagonLayerRef.current) {
+          hexagonLayerRef.current.destroy();
+          hexagonLayerRef.current = null;
+        }
+        if (buildingPolygonRef.current) {
+          buildingPolygonRef.current.destroy();
+          buildingPolygonRef.current = null;
+        }
         mapInstance.current = null;
         setIsMapReady(false);
+      }
+
+      // Полностью очищаем контейнер карты
+      if (mapContainer.current) {
+        mapContainer.current.innerHTML = '';
+        // Удаляем все дочерние элементы
+        while (mapContainer.current.firstChild) {
+          mapContainer.current.removeChild(mapContainer.current.firstChild);
+        }
       }
 
       try {
         if (!mapContainer.current || !mounted) return;
 
-        console.log('Loading 2GIS API');
-        const mapglAPI = await load();
+        console.log('Loading 2GIS API with key:', MAP_API_KEY);
 
-        if (!mounted) return;
-
-        console.log('Creating map instance');
-        const mapOptions: MapGLOptions = {
-          center: KOPTEVO_CENTER,
-          zoom: isMobile ? 14 : 15,
-          key: MAP_API_KEY,
-          style: 'c080bb6a-8134-4993-93a1-5b4d8c36a59b',
-          zoomControl: false,
-          maxZoom: 19,
-          minZoom: 13
-        };
-
-        const map = new mapglAPI.Map(mapContainer.current, mapOptions);
-
-        if (!mounted) {
-          map.destroy();
-          return;
+        // Проверяем, не загружен ли уже 2GIS API
+        if ((window as any).DG) {
+          console.log('2GIS API already loaded, creating map');
+          // Добавляем небольшую задержку для полной очистки контейнера
+          setTimeout(() => {
+            (window as any).DG.then(createMap);
+          }, 100);
+        } else {
+          // Загружаем обычный 2GIS API с ключом и полным пакетом
+          const script = document.createElement('script');
+          script.src = `https://maps.api.2gis.ru/2.0/loader.js?pkg=full&key=${MAP_API_KEY}`;
+          script.onload = () => {
+            if (!mounted) return;
+            console.log('2GIS API loaded, creating map');
+            // Добавляем небольшую задержку для полной очистки контейнера
+            setTimeout(() => {
+              (window as any).DG.then(createMap);
+            }, 100);
+          };
+          script.onerror = () => {
+            console.error('Failed to load 2GIS API');
+            setMapError('Ошибка при загрузке 2GIS API');
+          };
+          document.head.appendChild(script);
         }
-
-        mapInstance.current = map;
-
-        // Пока убираем полигон, чтобы карта загружалась
-        // TODO: Добавить полигон после исправления API
-
-        // Ждем загрузку карты
-        map.on('load', () => {
-          console.log('Map loaded');
-          setIsMapReady(true);
-        });
 
       } catch (error) {
         console.error('Error initializing map:', error);
@@ -134,41 +124,161 @@ export const DemoSection = () => {
       }
     };
 
+    const createMap = () => {
+      if (!mounted || !mapContainer.current) return;
+
+      // Проверяем, не создана ли уже карта
+      if (mapInstance.current) {
+        console.log('Map already exists, skipping creation');
+        return;
+      }
+
+      console.log('DG available, creating map with center:', KOPTEVO_CENTER);
+
+      const map = (window as any).DG.map(mapContainer.current, {
+        center: KOPTEVO_CENTER, // Центр района Коптево
+        zoom: isMobile ? 14 : 15,
+        maxBounds: [
+          [55.821216, 37.516286], // Юго-западная граница
+          [55.841216, 37.536286]  // Северо-восточная граница
+        ],
+        maxBoundsViscosity: 1.0, // Полное ограничение - карта не может выйти за границы
+        minZoom: 13, // Минимальный зум для района
+        maxZoom: 18  // Максимальный зум для района
+      });
+
+      console.log('Map created successfully');
+
+      mapInstance.current = map;
+      setIsMapReady(true);
+
+      // Добавляем точную границу района Коптево как полигон
+      console.log('Adding Koptevo polygon with coordinates:', KOPTEVO_POLYGON);
+      (window as any).DG.polygon(KOPTEVO_POLYGON, {
+        color: '#ff0000',
+        weight: 3,
+        fillColor: '#ff0000',
+        fillOpacity: 0.1
+      }).addTo(map);
+
+      console.log('✓ 2GIS map created successfully with Koptevo district polygon border');
+
+      // Создаем слой гексагонов
+      hexagonLayerRef.current = createHexagonLayer(map);
+
+      // Добавляем обработчик кликов по карте для определения зон
+      const zoneClickHandler = createZoneClickHandler(map);
+      map.on('click', zoneClickHandler);
+    };
+
     initializeMap();
 
     return () => {
       mounted = false;
       markersRef.current.forEach(marker => marker.destroy());
       markersRef.current = [];
+      if (buildingPolygonRef.current) {
+        buildingPolygonRef.current.destroy();
+        buildingPolygonRef.current = null;
+      }
+      if (hexagonLayerRef.current) {
+        hexagonLayerRef.current.destroy();
+        hexagonLayerRef.current = null;
+      }
+
       if (mapInstance.current) {
-        mapInstance.current.destroy();
         mapInstance.current = null;
       }
       setIsMapReady(false);
     };
   }, [isMobile]);
 
+  // Функция для обработки выбора объекта недвижимости
+  const handlePropertySelect = async (property: CianProperty) => {
+    console.log('Property selected:', property);
+
+    // Очищаем предыдущие границы здания
+    if (buildingPolygonRef.current) {
+      buildingPolygonRef.current.destroy();
+      buildingPolygonRef.current = null;
+    }
+
+    // Если у объекта есть ID здания, получаем и отображаем его границы
+    if (property.buildingId && mapInstance.current) {
+      try {
+        console.log('Getting building boundaries for:', property.buildingId);
+        const boundary = await getBuildingBoundaries(property.buildingId);
+
+        if (boundary) {
+          console.log('Creating building polygon for:', boundary.name);
+          const polygon = createBuildingPolygon(mapInstance.current, boundary);
+          if (polygon) {
+            buildingPolygonRef.current = polygon;
+          }
+        } else {
+          console.log('No building boundaries found for:', property.buildingId);
+        }
+      } catch (error) {
+        console.error('Error getting building boundaries:', error);
+      }
+    }
+  };
+
   // Добавление маркеров при загрузке данных и карты
   useEffect(() => {
+    console.log('useEffect triggered:', {
+      isMapReady,
+      hasMapInstance: !!mapInstance.current,
+      propertiesLength: properties.length,
+      priceType
+    });
+
+    // Очищаем старые маркеры
+    if (markersRef.current.length > 0) {
+      console.log('Clearing old markers');
+      markersRef.current.forEach(marker => marker.destroy());
+      markersRef.current = [];
+    }
+
     if (isMapReady && mapInstance.current && properties.length > 0) {
-      console.log('Adding property markers');
+      console.log('Adding property markers with priceType:', priceType);
       const markers = createPropertyMarkers(
         mapInstance.current,
         properties,
-        setSelectedProperty
+        handlePropertySelect,
+        priceType
       );
       markersRef.current = markers;
+
+      // При использовании 2GIS API маркеры автоматически обновляют позиции
+      console.log('Markers will automatically update with 2GIS API');
     }
-  }, [isMapReady, properties]);
+  }, [isMapReady, properties, priceType]);
+
+  // Управление гексагонами
+  useEffect(() => {
+    if (hexagonLayerRef.current) {
+      if (showHexagons) {
+        console.log('Showing hexagons');
+        hexagonLayerRef.current.update();
+      } else {
+        console.log('Hiding hexagons');
+        hexagonLayerRef.current.destroy();
+        hexagonLayerRef.current = createHexagonLayer(mapInstance.current);
+      }
+    }
+  }, [showHexagons]);
+
+
 
   return (
     <section className="min-h-[calc(100vh-4rem)] flex items-center bg-white dark:bg-[#0f0f0f]">
       <div className="max-w-6xl mx-auto px-4 w-full py-8">
         <h2 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-4">
-          Аналитика недвижимости в Коптево
+          Аналитика коммерческой недвижимости
         </h2>
         <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
-          Демо-версия интерактивной карты с данными ЦИАН
+          Интерактивная карта районов Коптево и Коньково - объекты недвижимости с данными ЦИАН
         </p>
 
         <div className="w-full relative">
@@ -186,119 +296,168 @@ export const DemoSection = () => {
                     style={{ width: '100%', height: '100%' }}
                   />
 
-                  {/* Шкала цен */}
-                  <div className={`absolute ${isMobile ? 'bottom-8 left-1/2 -translate-x-1/2' : 'bottom-8 left-4'} z-20`}>
-                    <HeatScale
-                      min="Низкая цена"
-                      max="Высокая цена"
-                      className={isMobile ? 'transform scale-90' : ''}
-                    />
+                  {/* Индикатор загрузки карты */}
+                  {!isMapReady && !mapError && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600 dark:text-gray-400">Загрузка карты...</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Легенда маркеров */}
+                  <div className={`absolute ${isMobile ? 'bottom-8 left-1/2 -translate-x-1/2' : 'bottom-8 left-4'} z-20 bg-white/95 dark:bg-gray-800/95 p-3 rounded-lg shadow-lg`}>
+                    {/* Переключатель типа цены */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <button
+                        onClick={() => setPriceType('perMeter')}
+                        className={`px-2 py-1 text-xs rounded transition-colors ${priceType === 'perMeter'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                          }`}
+                      >
+                        Цена за м²
+                      </button>
+                      <button
+                        onClick={() => setPriceType('total')}
+                        className={`px-2 py-1 text-xs rounded transition-colors ${priceType === 'total'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                          }`}
+                      >
+                        Общая цена
+                      </button>
+                    </div>
+
+                    {/* Легенда для цены за м² */}
+                    {priceType === 'perMeter' && (
+                      <>
+                        <h4 className="text-sm font-semibold mb-2">Цена за м²:</h4>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span>До 35 000 ₽</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <span>35 000-45 000 ₽</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                            <span>45 000-55 000 ₽</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                            <span>Более 55 000 ₽</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Легенда для общей цены */}
+                    {priceType === 'total' && (
+                      <>
+                        <h4 className="text-sm font-semibold mb-2">Общая цена (аренда):</h4>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span>До 200 000 ₽</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <span>200 000-500 000 ₽</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                            <span>500 000-1 000 000 ₽</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                            <span>Более 1 000 000 ₽</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
 
-                  {/* Кнопки зума */}
-                  <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+                  {/* Кнопки управления */}
+                  <div className={`absolute ${isMobile ? 'bottom-4 right-4' : 'bottom-4 right-4'} z-20 flex flex-col gap-2`}>
+                    {/* Кнопка переключения гексагонов */}
                     <button
-                      onClick={() => mapInstance.current?.setZoom(mapInstance.current.getZoom() + 1)}
-                      className="w-8 h-8 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-200/20 dark:border-gray-700/20"
-                      aria-label="Приблизить"
+                      onClick={() => setShowHexagons(!showHexagons)}
+                      className={`w-12 h-12 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center ${showHexagons
+                        ? 'bg-blue-600 text-white shadow-blue-500/50'
+                        : 'bg-white/95 dark:bg-gray-800/95 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700'
+                        }`}
+                      title={showHexagons ? 'Скрыть гексагоны' : 'Показать гексагоны'}
                     >
-                      <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                    </button>
-                    <button
-                      onClick={() => mapInstance.current?.setZoom(mapInstance.current.getZoom() - 1)}
-                      className="w-8 h-8 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-200/20 dark:border-gray-700/20"
-                      aria-label="Отдалить"
-                    >
-                      <Minus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 3.5a1.5 1.5 0 113 0v4a1.5 1.5 0 01-3 0v-4zM10 8.5a1.5 1.5 0 013 0v4a1.5 1.5 0 01-3 0v-4zM10 13.5a1.5 1.5 0 013 0v4a1.5 1.5 0 01-3 0v-4z" />
+                      </svg>
                     </button>
                   </div>
 
 
 
-                  {/* Демо-модальное окно */}
-                  {showDemoModal && (
+
+
+                  {/* Демо-модальное окно - только на карте */}
+                  {showDemoModal && isMapReady && (
                     <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                       <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6 rounded-2xl max-w-sm mx-4 shadow-2xl border border-gray-700/50 transform transition-all duration-300 hover:scale-105">
                         {/* Декоративные элементы */}
-                        <div className="absolute -top-1 -left-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full animate-pulse"></div>
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-red-500 to-orange-500 rounded-full animate-pulse delay-1000"></div>
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-t-2xl"></div>
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full opacity-20"></div>
+                        <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-purple-500 rounded-full opacity-20"></div>
 
-                        {/* Заголовок с градиентом */}
                         <div className="text-center mb-4">
                           <h2 className="text-xl font-bold mb-2 text-white">
                             ДЕМО-ВЕРСИЯ КАРТЫ
                           </h2>
-                          <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 mx-auto rounded-full mb-3"></div>
+                          <div className="w-16 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto mb-3"></div>
                           <p className="text-gray-300 text-sm font-medium">
-                            Москва • район Коптево
+                            Районы Коптево и Коньково • коммерческая недвижимость
                           </p>
                         </div>
 
-                        {/* Категория с улучшенным дизайном */}
-                        <div className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white p-4 rounded-xl mb-4 flex items-center justify-center shadow-lg border border-red-400/30 transform hover:scale-105 transition-transform duration-200">
-                          <div className="bg-white/20 p-1.5 rounded-lg mr-2">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                            </svg>
-                          </div>
-                          <span className="font-bold text-base">{selectedCategory}</span>
+                        {/* Категория */}
+                        <div className="bg-gray-800/50 p-3 rounded-xl mb-4 border border-gray-700/50">
+                          <p className="text-gray-300 text-sm">
+                            <span className="text-blue-400 font-semibold">Категория:</span> {selectedCategory}
+                          </p>
                         </div>
 
                         {/* Инструкция с иконкой */}
                         <div className="bg-gray-800/50 p-4 rounded-xl mb-6 border border-gray-700/50">
                           <div className="flex items-start">
-                            <div className="bg-blue-500/20 p-1.5 rounded-lg mr-2 mt-0.5">
-                              <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </div>
                             <p className="text-gray-300 text-sm leading-relaxed">
-                              Чтобы посмотреть детальную статистику района, нажмите на нужную область карты
+                              Нажмите на любой маркер объекта недвижимости, чтобы увидеть детальную информацию
                             </p>
                           </div>
                         </div>
 
-                        {/* Кнопки с градиентами */}
+                        {/* Кнопки */}
                         <div className="flex gap-3">
                           <button
                             onClick={() => setShowDemoModal(false)}
-                            className="flex-1 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg border border-gray-600/50 font-medium text-sm"
+                            className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105"
                           >
-                            Пропустить обучение
+                            Начать
                           </button>
                           <button
                             onClick={() => setShowDemoModal(false)}
-                            className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg border border-red-400/50 font-medium text-sm"
+                            className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
                           >
-                            Далее
+                            Пропустить
                           </button>
                         </div>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Информация об объекте */}
-                  {selectedProperty && (
-                    <div className="absolute bottom-4 left-4 z-20 bg-white/95 dark:bg-gray-800/95 p-4 rounded-lg shadow-lg">
-                      <h3 className="font-semibold mb-2">Информация об объекте</h3>
-                      <div className="space-y-1 text-sm">
-                        <p>Площадь: {selectedProperty.area} м²</p>
-                        <p>Цена за м²: {selectedProperty.pricePerMeter.toLocaleString()} ₽</p>
-                        <a
-                          href={selectedProperty.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-600"
-                        >
-                          Открыть на ЦИАН
-                        </a>
-                      </div>
-                      <button
-                        onClick={() => setSelectedProperty(null)}
-                        className="mt-3 text-xs text-gray-500 hover:text-gray-700"
-                      >
-                        Закрыть
-                      </button>
                     </div>
                   )}
                 </>
@@ -309,4 +468,6 @@ export const DemoSection = () => {
       </div>
     </section>
   );
-}; 
+};
+
+export default DemoSection; 

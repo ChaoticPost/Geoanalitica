@@ -7,7 +7,7 @@ const PromoSection = lazy(() => import('../components/sections/PromoSection').th
 const LocationAnalytics = lazy(() => import('../components/sections/LocationAnalytics').then(module => ({ default: module.LocationAnalytics })));
 const PricingSection = lazy(() => import('../components/sections/PricingSection').then(module => ({ default: module.PricingSection })));
 const ReviewsSection = lazy(() => import('../components/sections/ReviewsSection').then(module => ({ default: module.ReviewsSection })));
-const DemoSection = lazy(() => import('../components/sections/DemoSection').then(module => ({ default: module.DemoSection })));
+const DemoSection = lazy(() => import('../components/sections/DemoSection'));
 const FAQSection = lazy(() => import('../components/sections/FAQSection').then(module => ({ default: module.FAQSection })));
 const ContactSection = lazy(() => import('../components/sections/ContactSection').then(module => ({ default: module.ContactSection })));
 

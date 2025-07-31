@@ -14,19 +14,18 @@ export default defineConfig({
   server: {
     port: 3006,
     strictPort: true,
-    host: true,
+    host: '0.0.0.0',
     cors: true,
     hmr: {
-      protocol: 'ws',
+      protocol: 'wss',
       host: 'localhost',
       port: 3006,
       clientPort: 3006,
-      timeout: 5000,
-      overlay: true,
     },
     watch: {
       usePolling: true,
     },
+    allowedHosts: ['.ngrok-free.app'],
   },
   optimizeDeps: {
     include: ['h3-js', '@2gis/mapgl'],

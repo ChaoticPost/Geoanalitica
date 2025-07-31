@@ -1,215 +1,214 @@
-import * as h3 from 'h3-js';
-import type { Map as MapGL, LngLatArray } from '@2gis/mapgl/types';
+import { cellToLatLng, latLngToCell, getRes0Cells } from 'h3-js';
 
-export interface Point {
-  lat: number;
-  lng: number;
+export interface HexagonLayer {
+  destroy: () => void;
+  update: () => void;
 }
 
-// Получаем оптимальное разрешение H3 в зависимости от зума карты
-const getOptimalResolution = (zoom: number): number => {
-  if (typeof zoom !== 'number' || isNaN(zoom)) {
-    console.warn('Invalid zoom level:', zoom);
-    return 9; // Возвращаем безопасное значение по умолчанию
-  }
-  // H3 resolution mapping based on zoom level
-  if (zoom <= 9) return 7;  // Увеличили базовое разрешение
-  if (zoom <= 11) return 8;
-  if (zoom <= 13) return 9;
-  if (zoom <= 15) return 10;
-  return 11;
+// Координаты района Коптево
+const KOPTEVO_BOUNDS = {
+  north: 55.841216,
+  south: 55.821216,
+  east: 37.536286,
+  west: 37.516286
 };
 
-// Получаем цвет для гексагона
-const getColor = (): string => {
-  return 'rgba(51, 136, 255, 0.2)'; // Полупрозрачный синий
-};
+const KOPTEVO_CENTER = [55.831216, 37.526286];
 
-// Проверяем валидность координат
-const isValidCoordinate = (lat: number, lng: number): boolean => {
-  return (
-    typeof lat === 'number' && 
-    typeof lng === 'number' && 
-    !isNaN(lat) && 
-    !isNaN(lng) && 
-    lat >= -90 && 
-    lat <= 90 && 
-    lng >= -180 && 
-    lng <= 180
-  );
-};
-
-// Проверяем валидность границ карты
-const isValidBounds = (bounds: unknown): bounds is [[number, number], [number, number]] => {
-  if (!Array.isArray(bounds) || bounds.length !== 2) return false;
-  const [sw, ne] = bounds;
-  if (!Array.isArray(sw) || !Array.isArray(ne) || sw.length !== 2 || ne.length !== 2) return false;
-  const [swLng, swLat] = sw;
-  const [neLng, neLat] = ne;
-  return isValidCoordinate(swLat, swLng) && isValidCoordinate(neLat, neLng);
-};
-
-// Создаем слой гексагонов
-export const createHexagonLayer = (
-  map: MapGL,
-  _points: Point[], // Игнорируем points, так как создаем равномерную сетку
-  onError: (error: string) => void
-) => {
-  console.log('Creating hexagon layer');
-  
-  const polygons: Array<{ destroy: () => void }> = [];
-  let isDestroyed = false;
+export const createHexagonLayer = (map: any): HexagonLayer => {
+  let hexagons: any[] = [];
   let isUpdating = false;
-  
+
+  const createHexagonElement = (lat: number, lng: number, size: number) => {
+    const hexagon = document.createElement('div');
+    hexagon.style.position = 'absolute';
+    hexagon.style.width = `${size}px`;
+    hexagon.style.height = `${size}px`;
+    hexagon.style.backgroundColor = 'rgba(0, 128, 255, 0.4)'; // Более заметный цвет
+    hexagon.style.border = '2px solid rgba(0, 128, 255, 0.8)'; // Более заметная граница
+    hexagon.style.borderRadius = '50%';
+    hexagon.style.pointerEvents = 'auto';
+    hexagon.style.cursor = 'pointer';
+    hexagon.style.zIndex = '5';
+    hexagon.style.transform = 'translate(-50%, -50%)';
+    hexagon.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)'; // Добавляем тень
+    hexagon.title = `Гексагон: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+    // Добавляем hover эффект
+    hexagon.addEventListener('mouseenter', () => {
+      hexagon.style.backgroundColor = 'rgba(0, 128, 255, 0.6)';
+      hexagon.style.border = '2px solid rgba(0, 128, 255, 1)';
+      hexagon.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+    });
+
+    hexagon.addEventListener('mouseleave', () => {
+      hexagon.style.backgroundColor = 'rgba(0, 128, 255, 0.4)';
+      hexagon.style.border = '2px solid rgba(0, 128, 255, 0.8)';
+      hexagon.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+
+    // Добавляем клик обработчик
+    hexagon.addEventListener('click', () => {
+      console.log('Hexagon clicked:', { lat, lng });
+      // Здесь можно добавить логику для отображения данных гексагона
+    });
+
+    return hexagon;
+  };
+
+  const projectPoint = (lat: number, lng: number, mapContainer: HTMLElement, map: any) => {
+    try {
+      const bounds = map.getBounds();
+      if (!bounds) return null;
+
+      const containerRect = mapContainer.getBoundingClientRect();
+      const width = containerRect.width;
+      const height = containerRect.height;
+
+      // Нормализуем координаты относительно границ карты
+      const latRatio = (lat - bounds.getSouth()) / (bounds.getNorth() - bounds.getSouth());
+      const lngRatio = (lng - bounds.getWest()) / (bounds.getEast() - bounds.getWest());
+
+      // Преобразуем в пиксели
+      const x = lngRatio * width;
+      const y = (1 - latRatio) * height; // Инвертируем Y
+
+      return { x, y };
+    } catch (error) {
+      console.warn('Error projecting point:', error);
+      return null;
+    }
+  };
+
   const updateGrid = () => {
-    if (isDestroyed) {
-      console.log('Skipping update - layer is destroyed');
-      return;
-    }
-
-    if (isUpdating) {
-      console.log('Update already in progress, skipping');
-      return;
-    }
-
+    if (isUpdating) return;
     isUpdating = true;
 
     try {
-      console.log('Starting grid update');
-      
-      // Очищаем старые полигоны
-      polygons.forEach(polygon => polygon.destroy());
-      polygons.length = 0;
-      
-      // Получаем и проверяем границы карты
-      const bounds = map.getBounds();
-      if (!isValidBounds(bounds)) {
-        throw new Error('Invalid map bounds');
-      }
-      
-      const [[swLng, swLat], [neLng, neLat]] = bounds;
-      console.log('Map bounds:', { swLat, swLng, neLat, neLng });
-      
-      // Получаем зум и определяем размер гексагонов
-      const zoom = map.getZoom();
-      const resolution = getOptimalResolution(zoom);
-      console.log('Map zoom and resolution:', { zoom, resolution });
+      console.log('Updating hexagon grid for Koptevo district');
 
-      // Проверяем, что центр карты валиден
-      const centerLat = (swLat + neLat) / 2;
-      const centerLng = (swLng + neLng) / 2;
-      if (!isValidCoordinate(centerLat, centerLng)) {
-        throw new Error('Invalid map center coordinates');
-      }
-
-      // Создаем базовый гексагон в центре
-      const centerHex = h3.latLngToCell(centerLat, centerLng, resolution);
-      console.log('Center hex:', { centerLat, centerLng, centerHex });
-
-      // Получаем кольца гексагонов
-      const ringSize = Math.max(2, Math.ceil((20 - zoom))); // Увеличили минимальный размер кольца
-      const hexagons = h3.gridDisk(centerHex, ringSize);
-      
-      if (!Array.isArray(hexagons) || hexagons.length === 0) {
-        throw new Error('Failed to generate hexagons');
-      }
-      
-      console.log('Generated hexagons:', { count: hexagons.length, ringSize });
-
-      // Фильтруем гексагоны по видимой области
-      const visibleHexagons = hexagons.filter(hexId => {
-        try {
-          const hexBounds = h3.cellToBoundary(hexId);
-          if (!Array.isArray(hexBounds) || hexBounds.length === 0) return false;
-          
-          return hexBounds.some(([lat, lng]) => 
-            isValidCoordinate(lat, lng) &&
-            lat >= swLat && lat <= neLat && 
-            lng >= swLng && lng <= neLng
-          );
-        } catch (error) {
-          console.warn('Error checking hexagon visibility:', { hexId, error });
-          return false;
+      // Очищаем предыдущие гексагоны
+      hexagons.forEach(hex => {
+        if (hex.element && hex.element.parentNode) {
+          hex.element.parentNode.removeChild(hex.element);
         }
       });
+      hexagons = [];
 
-      console.log('Visible hexagons:', visibleHexagons.length);
+      if (!map || !map.getContainer) {
+        console.warn('Map not ready for hexagon grid');
+        isUpdating = false;
+        return;
+      }
 
-      // Создаем полигоны для каждого гексагона
-      visibleHexagons.forEach(hexId => {
-        try {
-          // Получаем границы гексагона
-          const boundaries = h3.cellToBoundary(hexId);
-          if (!Array.isArray(boundaries) || boundaries.length < 6) {
-            console.warn('Invalid hexagon boundaries:', { hexId, boundaries });
-            return;
-          }
-          
-          // Преобразуем координаты для 2GIS MapGL
-          const coordinates = boundaries.map(([lat, lng]) => {
-            if (!isValidCoordinate(lat, lng)) {
-              console.warn('Invalid coordinate:', { lat, lng });
-              return null;
+      const mapContainer = map.getContainer();
+      if (!mapContainer) {
+        console.warn('Map container not found');
+        isUpdating = false;
+        return;
+      }
+
+      // Создаем контейнер для гексагонов
+      let hexagonContainer = mapContainer.querySelector('.hexagon-container');
+      if (!hexagonContainer) {
+        hexagonContainer = document.createElement('div');
+        hexagonContainer.className = 'hexagon-container';
+        hexagonContainer.style.position = 'absolute';
+        hexagonContainer.style.top = '0';
+        hexagonContainer.style.left = '0';
+        hexagonContainer.style.width = '100%';
+        hexagonContainer.style.height = '100%';
+        hexagonContainer.style.pointerEvents = 'none';
+        hexagonContainer.style.zIndex = '5';
+        mapContainer.appendChild(hexagonContainer);
+      }
+
+      // Создаем равномерную сетку гексагонов в районе Коптево
+      const gridSize = 20; // Размер сетки
+      const hexSize = 40; // Увеличиваем размер гексагона
+
+      for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+          // Вычисляем координаты в районе Коптево
+          const lat = KOPTEVO_BOUNDS.south + (i / (gridSize - 1)) * (KOPTEVO_BOUNDS.north - KOPTEVO_BOUNDS.south);
+          const lng = KOPTEVO_BOUNDS.west + (j / (gridSize - 1)) * (KOPTEVO_BOUNDS.east - KOPTEVO_BOUNDS.west);
+
+          // Проверяем, что точка в пределах района Коптево
+          if (lat >= KOPTEVO_BOUNDS.south && lat <= KOPTEVO_BOUNDS.north &&
+            lng >= KOPTEVO_BOUNDS.west && lng <= KOPTEVO_BOUNDS.east) {
+
+            const projected = projectPoint(lat, lng, mapContainer, map);
+            if (projected) {
+              const hexElement = createHexagonElement(lat, lng, hexSize);
+              hexElement.style.left = `${projected.x}px`;
+              hexElement.style.top = `${projected.y}px`;
+              hexElement.style.pointerEvents = 'auto'; // Разрешаем взаимодействие
+
+              hexagonContainer.appendChild(hexElement);
+
+              hexagons.push({
+                element: hexElement,
+                lat,
+                lng,
+                projected
+              });
             }
-            return [lng, lat] as LngLatArray;
-          }).filter((coord): coord is LngLatArray => coord !== null);
-
-          if (coordinates.length < 6) {
-            console.warn('Not enough valid coordinates for hexagon:', { 
-              hexId, 
-              validPoints: coordinates.length 
-            });
-            return;
           }
-
-          // Замыкаем полигон
-          coordinates.push(coordinates[0]);
-          
-          // Создаем полигон
-          const polygon = map.addPolygon({
-            coordinates: [coordinates],
-            color: getColor(),
-            strokeColor: '#FFFFFF',
-            strokeWidth: 1,
-            fillOpacity: 0.5,
-            zIndex: 1
-          });
-          
-          polygons.push(polygon);
-        } catch (error) {
-          console.error('Error creating polygon for hexagon:', { hexId, error });
         }
-      });
-      
-      console.log('Created polygons:', polygons.length);
+      }
+
+      console.log(`Created ${hexagons.length} hexagons in Koptevo district`);
+
     } catch (error) {
-      console.error('Error updating grid:', error);
-      onError('Ошибка при обновлении сетки гексагонов');
+      console.error('Error updating hexagon grid:', error);
     } finally {
       isUpdating = false;
     }
   };
-  
-  // Обновляем сетку при изменении границ карты
-  const boundsChangeHandler = () => {
-    console.log('Map bounds changed, updating grid');
-    updateGrid();
+
+  // Обновляем позиции гексагонов при изменении карты
+  const updateHexagonPositions = () => {
+    if (isUpdating) return;
+
+    hexagons.forEach(hex => {
+      if (hex.element && map) {
+        const mapContainer = map.getContainer();
+        if (mapContainer) {
+          const projected = projectPoint(hex.lat, hex.lng, mapContainer, map);
+          if (projected) {
+            hex.element.style.left = `${projected.x}px`;
+            hex.element.style.top = `${projected.y}px`;
+            hex.projected = projected;
+          }
+        }
+      }
+    });
   };
-  
-  map.on('moveend', boundsChangeHandler);
-  
-  // Создаем начальную сетку
-  console.log('Creating initial grid');
-  updateGrid();
-  
+
+  // Добавляем обработчики событий карты
+  if (map) {
+    map.on('moveend', updateHexagonPositions);
+    map.on('zoomend', updateHexagonPositions);
+  }
+
   return {
     destroy: () => {
       console.log('Destroying hexagon layer');
-      isDestroyed = true;
-      map.off('moveend', boundsChangeHandler);
-      polygons.forEach(polygon => polygon.destroy());
-      polygons.length = 0;
+      hexagons.forEach(hex => {
+        if (hex.element && hex.element.parentNode) {
+          hex.element.parentNode.removeChild(hex.element);
+        }
+      });
+      hexagons = [];
+
+      if (map) {
+        map.off('moveend', updateHexagonPositions);
+        map.off('zoomend', updateHexagonPositions);
+      }
     },
-    update: updateGrid
+    update: () => {
+      console.log('Updating hexagon layer');
+      updateGrid();
+    }
   };
-};
+}; 

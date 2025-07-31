@@ -89,4 +89,15 @@ declare module '@2gis/mapgl' {
   }
 
   export function load(): Promise<MapglAPI>;
+}
+
+// Добавляем глобальные типы для доступа к конструкторам
+declare global {
+  interface Window {
+    mapgl?: {
+      Map: any;
+      Polygon: any;
+      Marker: any;
+    };
+  }
 } 

@@ -223,6 +223,7 @@ pytest --cov=app tests/  # Проверка покрытия
 - FullStack-разработчик и UX/UI- [Дарья Чугунова](https://github.com/ChaoricPost)
 
 - Product management - [Максим Шилкин](https://t.me/shilkinm)
+- Аналитик / Data Scientist [Артур Артиков](https://t.me/ArturArtikov)
 
 
 ## 📞 Контакты
