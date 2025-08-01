@@ -1,3 +1,5 @@
+import { fetchWithNgrok } from '@/utils/fetchWithNgrok';
+
 const API_URL = 'http://localhost:8000/api/v1';
 
 export interface ContactFormData {
@@ -13,7 +15,7 @@ export interface ContactResponse {
 
 export const api = {
   get: async <T>(endpoint: string): Promise<T> => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetchWithNgrok(`${API_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -27,10 +29,10 @@ export const api = {
 
     return response.json();
   },
-  
+
   contact: {
     send: async (data: ContactFormData): Promise<ContactResponse> => {
-      const response = await fetch(`${API_URL}/contact`, {
+      const response = await fetchWithNgrok(`${API_URL}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
