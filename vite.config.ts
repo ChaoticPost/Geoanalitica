@@ -11,21 +11,25 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  publicDir: 'public',
+  base: '/',
   server: {
     port: 3006,
     strictPort: true,
     host: '0.0.0.0',
     cors: true,
     hmr: {
-      protocol: 'wss',
+      protocol: 'ws',
       host: 'localhost',
       port: 3006,
       clientPort: 3006,
+      timeout: 50,
+      overlay: true,
     },
     watch: {
       usePolling: true,
     },
-    allowedHosts: ['.ngrok-free.app'],
+    allowedHosts: ['.ngrok-free.app', '.ngrok.io', '.loca.lt'],
   },
   optimizeDeps: {
     include: ['h3-js', '@2gis/mapgl'],
