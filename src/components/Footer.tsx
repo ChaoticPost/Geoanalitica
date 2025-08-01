@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { MapPin, Mail, Phone } from 'lucide-react';
+import iconGeo from '@/assets/images/icons/icon_geo.png';
 
 const footerAnimation = {
     hidden: { opacity: 0, y: 20 },
@@ -36,7 +37,7 @@ export const Footer = () => {
                     {/* Геоаналитика */}
                     <motion.div variants={itemAnimation} className="flex-1 min-w-[200px]">
                         <div className="flex items-center gap-2 mb-4">
-                            <img src="/src/assets/images/icons/icon_geo.png" alt="GeoAnalitica" className="h-8 w-8" />
+                            <img src={iconGeo} alt="GeoAnalitica" className="h-8 w-8" />
                             <h3 className="text-2xl font-bold text-foreground">
                                 GeoAnalitica
                             </h3>
