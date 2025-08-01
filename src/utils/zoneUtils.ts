@@ -6,7 +6,7 @@ const KOPTEVO_BOUNDS = {
   west: 37.510000
 };
 
-// Центр между районами
+// Центр между районами (более точные координаты)
 const KOPTEVO_CENTER = {
   lat: 55.735000,
   lng: 37.530000
@@ -75,17 +75,26 @@ export const getZoneByCoordinates = (lat: number, lng: number): Zone | null => {
   // Проверяем, что точка находится в пределах района Коптево
   if (lat < KOPTEVO_BOUNDS.south || lat > KOPTEVO_BOUNDS.north ||
     lng < KOPTEVO_BOUNDS.west || lng > KOPTEVO_BOUNDS.east) {
+    console.log(`❌ Координаты [${lat.toFixed(6)}, ${lng.toFixed(6)}] находятся за пределами района Коптево`);
     return null;
   }
 
-  // Определяем зону
+  // Определяем зону с подробным логированием
   for (const zone of KOPTEVO_ZONES) {
-    if (lat >= zone.bounds.south && lat <= zone.bounds.north &&
-      lng >= zone.bounds.west && lng <= zone.bounds.east) {
+    const inLatRange = lat >= zone.bounds.south && lat <= zone.bounds.north;
+    const inLngRange = lng >= zone.bounds.west && lng <= zone.bounds.east;
+
+    console.log(`🔍 Проверяем зону ${zone.name} (${zone.id}):`);
+    console.log(`   Широта: ${lat.toFixed(6)} в диапазоне ${zone.bounds.south.toFixed(6)}-${zone.bounds.north.toFixed(6)} = ${inLatRange}`);
+    console.log(`   Долгота: ${lng.toFixed(6)} в диапазоне ${zone.bounds.west.toFixed(6)}-${zone.bounds.east.toFixed(6)} = ${inLngRange}`);
+
+    if (inLatRange && inLngRange) {
+      console.log(`✅ Найдена зона: ${zone.name} (${zone.id})`);
       return zone;
     }
   }
 
+  console.log(`❌ Координаты [${lat.toFixed(6)}, ${lng.toFixed(6)}] не попадают ни в одну зону`);
   return null;
 };
 
@@ -135,6 +144,14 @@ export interface ZonePolygon {
 export const createZonePolygons = (map: any): ZonePolygon[] => {
   const polygons: ZonePolygon[] = [];
 
+  // Цвета для разных зон
+  const zoneColors = {
+    'NW': '#3b82f6', // Синий
+    'NE': '#10b981', // Зеленый
+    'SW': '#f59e0b', // Оранжевый
+    'SE': '#ef4444'  // Красный
+  };
+
   KOPTEVO_ZONES.forEach((zone, index) => {
     // Создаем координаты полигона для зоны
     const zoneCoordinates = [
@@ -147,9 +164,9 @@ export const createZonePolygons = (map: any): ZonePolygon[] => {
 
     // Создаем полигон для зоны
     const polygon = (window as any).DG.polygon(zoneCoordinates, {
-      color: '#3b82f6',
+      color: zoneColors[zone.id],
       weight: 2,
-      fillColor: '#3b82f6',
+      fillColor: zoneColors[zone.id],
       fillOpacity: 0.1,
       opacity: 0.8
     });
