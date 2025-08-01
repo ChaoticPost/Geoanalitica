@@ -63,49 +63,49 @@
 ### Установка
 
 1. Клонируйте репозиторий:
-\`\`\`bash
+```bash
 git clone https://github.com/your-username/geoanalitica.git
 cd geoanalitica
-\`\`\`
+```
 
 2. Установите зависимости frontend:
-\`\`\`bash
+```
 npm install
-\`\`\`
+```
 
 3. Настройте переменные окружения:
-\`\`\`bash
+```
 cp .env.example .env
 # Отредактируйте .env файл, добавив необходимые ключи
-\`\`\`
+```
 
 4. Настройте backend:
-\`\`\`bash
+```
 cd backend
 python -m venv venv
 source venv/bin/activate  # На Windows: .\venv\Scripts\activate
 pip install -r requirements.txt
-\`\`\`
+```
 
 5. Настройте базу данных:
-\`\`\`bash
+```
 alembic upgrade head
-\`\`\`
+```
 
 ### Запуск для разработки
 
 1. Запустите frontend:
-\`\`\`bash
+```
 npm run dev
-\`\`\`
+```
 
 2. Запустите backend:
-\`\`\`bash
+```
 cd backend
 .\start.ps1  # На Windows
 # или
 ./start.sh   # На Linux/Mac
-\`\`\`
+```
 
 ## 📁 Структура проекта
 
@@ -163,70 +163,68 @@ backend/
 
 ### Ветки
 
-- \`main\` - продакшн версия
-- \`develop\` - основная ветка разработки
-- \`feature/*\` - новый функционал
-- \`fix/*\` - исправление багов
-- \`refactor/*\` - рефакторинг
+- `main` - продакшн версия
+- `develop` - основная ветка разработки
+- `feature` - новый функционал
+- `fix` - исправление багов
+- `refactor` - рефакторинг
 
 ### Коммиты
 
 Используйте conventional commits с русскими комментариями:
-- \`feat: Добавлена новая функция\`
-- \`fix: Исправлен баг\`
-- \`docs: Обновлена документация\`
-- \`refactor: Переработан компонент\`
-- \`test: Добавлены тесты\`
+- `feat: Добавлена новая функция`
+- `fix: Исправлен баг`
+- `docs: Обновлена документация`
+- `refactor: Переработан компонент`
+- `test: Добавлены тесты`
 
 ## Деплой
+- все впереди
 
 ### Frontend
 
 1. Сборка проекта:
-\`\`\`bash
+```
 npm run build
-\`\`\`
+```
 
 2. Статика будет доступна в директории \`dist/\`
 
 ### Backend
 
 1. Установите зависимости продакшн:
-\`\`\`bash
+````
 pip install -r requirements.txt
-\`\`\`
-
-2. Настройте переменные окружения для продакшн
-3. Запустите через WSGI сервер (например, Gunicorn)
+```
 
 ## Тестирование
 
 ### Frontend
 
-\`\`\`bash
+```
 npm run test        # Запуск тестов
 npm run test:watch  # Запуск тестов в режиме наблюдения
 npm run test:coverage # Проверка покрытия кода тестами
-\`\`\`
+```
 
 ### Backend
 
-\`\`\`bash
+```
 pytest              # Запуск всех тестов
 pytest tests/test_users.py  # Запуск конкретного теста
 pytest --cov=app tests/  # Проверка покрытия
-\`\`\`
+```
 
 
-## 👥 Команда
+## Команда
 
 - FullStack-разработчик и UX/UI- [Дарья Чугунова](https://github.com/ChaoricPost)
-
-- Product management - [Максим Шилкин](https://t.me/shilkinm)
+- Продакт менеджер - [Максим Шилкин](https://t.me/shilkinm)
 - Аналитик / Data Scientist [Артур Артиков](https://t.me/ArturArtikov)
+- Продакт менеджер - [Максим Кусак](https://t.me/MaxKusSchwa)
+- Аналитик - [Титова Софья](https://t.me/sqquwi)
 
-
-## 📞 Контакты
+## Контакты
 
 По всем вопросам обращайтесь:
 - Email: dariachugu_work@inbox.ru
