@@ -286,6 +286,12 @@ const DemoSection = () => {
 
     // Проверяем, что клик был в пределах определенной области
     if (areaName !== 'Выбранная область') {
+      // Проверяем, что terminals не пустой
+      if (terminals.length === 0) {
+        console.warn('Terminals array is empty, cannot generate analytics');
+        return;
+      }
+
       const category = getCategoryFromTransactions(terminals);
       const period = getCurrentPeriod();
 
@@ -428,10 +434,10 @@ const DemoSection = () => {
     <section className="min-h-[calc(100vh-4rem)] flex items-center bg-white dark:bg-[#0f0f0f]">
       <div className="max-w-6xl mx-auto px-4 w-full py-8">
         <h2 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-4">
-          Аналитика коммерческой недвижимости и транзакций
+          Демо карта
         </h2>
         <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
-          Интерактивная карта районов Коптево и Коньково - объекты недвижимости с данными ЦИАН и терминалы с транзакционными данными
+          Интерактивная карта районов
         </p>
 
         <div className="w-full relative">

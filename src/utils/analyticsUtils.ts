@@ -125,9 +125,10 @@ export const getCategoryFromTransactions = (terminals: TerminalLocation[]): stri
     categoryCounts[category] = (categoryCounts[category] || 0) + 1;
   });
 
-  const mostCommonCategory = Object.keys(categoryCounts).reduce((a, b) => 
-    categoryCounts[a] > categoryCounts[b] ? a : b
-  );
+  const categoryKeys = Object.keys(categoryCounts);
+  const mostCommonCategory = categoryKeys.length > 0 
+    ? categoryKeys.reduce((a, b) => categoryCounts[a] > categoryCounts[b] ? a : b)
+    : 'Продукты';
 
   return mostCommonCategory || 'Продукты';
 };

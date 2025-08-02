@@ -31,7 +31,7 @@ export const Header = () => {
                     {/* Logo */}
                     <div className="flex-shrink-0 flex items-center">
                         <img src={iconGeo} alt="GeoAnalitica" className="h-8 w-8 mr-2" />
-                        <Link to="/" className="text-red-500 text-xl font-bold">GeoAnalitica</Link>
+                        <Link to="/" className="text-red-500 text-xl font-bold">Точка роста</Link>
                     </div>
 
                     {/* Desktop Navigation - Centered */}

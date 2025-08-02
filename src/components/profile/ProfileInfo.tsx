@@ -21,7 +21,7 @@ export const ProfileInfo = ({
     phone = '+7 (999) 123-45-67',
     position = 'Менеджер по развитию',
     location = 'Москва',
-    joinDate = 'Январь 2024',
+    joinDate = 'Июль 2025',
     avatar,
     onEdit
 }: ProfileInfoProps) => {

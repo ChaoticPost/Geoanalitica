@@ -42,7 +42,7 @@ export const groupPropertiesByCoordinates = (properties: CianProperty[]): Proper
     if (cluster.properties.length > 1) {
       // Выбираем объект с наибольшей площадью как основной
       cluster.centerProperty = cluster.properties.reduce((max, current) =>
-        current.area > max.area ? current : max
+        current.area > max.area ? current : max, cluster.properties[0]
       );
     }
   });

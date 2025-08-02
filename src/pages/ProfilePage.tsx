@@ -9,29 +9,29 @@ import { SubscriptionInfo } from '../components/profile/SubscriptionInfo';
 import { motion } from 'framer-motion';
 
 const mockUser = {
-    name: 'Александр Петров',
-    email: 'a.petrov@example.com',
+    name: 'Чугунова Дарья',
+    email: 'dariachugunova2003@gmail.com',
     organization: 'ООО "Инновации"',
     phone: '+7 (999) 123-45-67',
     position: 'Менеджер по развитию',
     location: 'Москва',
-    joinDate: 'Январь 2024'
+    joinDate: 'Июль 2025'
 };
 
 const mockLocations = [
-    { id: 1, address: 'Москва, ул. Тверская, 1', createdAt: '15 января 2024' },
-    { id: 2, address: 'Санкт-Петербург, Невский пр., 28', createdAt: '10 января 2024' }
+    { id: 1, address: 'Москва, ул. Тверская, 1', createdAt: '15 июля 2025' },
+    { id: 2, address: 'Москва, ул. Зорге, 5', createdAt: '10 июля 2025' }
 ];
 
 const mockReports = [
-    { id: 1, name: 'Отчет по локации #1', date: '15.01.2024', size: '2.4 MB' },
-    { id: 2, name: 'Отчет по локации #2', date: '10.01.2024', size: '1.8 MB' }
+    { id: 1, name: 'Отчет по локации #1', date: '15.07.2025', size: '2.4 MB' },
+    { id: 2, name: 'Отчет по локации #2', date: '10.07.2025', size: '1.8 MB' }
 ];
 
 const mockSubscription = {
-    plan: 'Бизнес',
-    price: '4 990 ₽/мес',
-    nextPayment: '15 февраля 2024'
+    plan: 'Бета',
+    price: '0 ₽/мес',
+    nextPayment: '15 августа 2025'
 };
 
 export const ProfilePage = () => {

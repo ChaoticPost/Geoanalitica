@@ -49,7 +49,7 @@ export const SubscriptionInfo = ({ subscription, onChangePlan }: SubscriptionInf
 
                 <div className="border-t border-border pt-6">
                     <p className="text-sm text-muted-foreground mb-4">
-                        Следующий платёж: {subscription.nextPayment}
+                        Обновление тарифа: {subscription.nextPayment}
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {features.map((feature, index) => (
